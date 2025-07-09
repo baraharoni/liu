@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box, Avatar, Typography, Button, Paper, Tabs, Tab, Divider, Stack,
-  AppBar, Toolbar, IconButton, Card, CardContent, CardMedia, List, ListItem, ListItemAvatar, ListItemText, Drawer, MenuItem, List as MUIList, Menu, Chip, Container
+  AppBar, Toolbar, IconButton, Card, CardContent, CardMedia, List, ListItem, ListItemAvatar, ListItemText, Drawer, MenuItem, List as MUIList, Menu, Chip, Container, Dialog, DialogTitle, DialogContent, DialogActions, Checkbox, FormControlLabel
 } from '@mui/material';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuIcon from '@mui/icons-material/Menu';
 import liuLogo from './assets/liu-logo.png';
 import liaddorImg from './assets/liaddor.jpg';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Link, useParams } from 'react-router-dom';
 import CreateWorkshop from './CreateWorkshop';
 import HelpWizardDialog from './HelpWizardDialog';
 import CalendarScreen from './CalendarScreen';
@@ -31,6 +30,11 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
+import HomeIcon from '@mui/icons-material/Home';
+import Snackbar from '@mui/material/Snackbar';
+import RegistrationAgreementDialog from './RegistrationAgreementDialog';
+import ChildCareIcon from '@mui/icons-material/ChildCare';
+import StarIcon from '@mui/icons-material/Star';
 
 const mainColor = "#b39ddb";
 const accentColor = "#d4c1ec";
@@ -57,7 +61,7 @@ const texts = {
     desc: "בעלת עסק עצמאי, מדריכת הורים, מנחת סדנאות",
     menu: "תפריט",
     switchLang: "English",
-    profile: "הפרופיל שלי",
+    profile: "ליו",
     calendar: "יומן",
     fav: "מועדפים",
     search: "חיפוש"
@@ -82,7 +86,7 @@ const texts = {
     desc: "Business owner, parent coach, workshop facilitator",
     menu: "Menu",
     switchLang: "עברית",
-    profile: "Profile",
+    profile: "ליו",
     calendar: "Calendar",
     fav: "Favorites",
     search: "Search"
@@ -109,13 +113,13 @@ function WorkshopCard({ workshop, lang, showParticipants }) {
                   <ListItemAvatar sx={{ minWidth: 32 }}>
                     <Avatar src={p.avatar} sx={{ width: 24, height: 24 }} />
                   </ListItemAvatar>
-                  <ListItemText 
-                    primary={p.name[lang]} 
-                    sx={{ 
-                      '& .MuiListItemText-primary': { 
+                  <ListItemText
+                    primary={p.name[lang]}
+                    sx={{
+                      '& .MuiListItemText-primary': {
                         fontSize: '0.875rem',
                         textAlign: 'right'
-                      } 
+                      }
                     }}
                   />
                 </ListItem>
@@ -205,45 +209,55 @@ function StoryCircle({ workshop, onClick, active }) {
   );
 }
 
-function StoryDialog({ open, workshops, index, onClose, onPrev, onNext, lang }) {
+function StoryDialog({ open, workshops, index, onClose, onPrev, onNext, lang, setAgreementOpen }) {
+  const navigate = useNavigate();
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  // Flatten all images from all workshops into a single array of {ws, img, wsIndex, imgIndex}
+  const allStories = workshops.flatMap((ws, wsIndex) => {
+    const imgs = ws.images || (ws.image ? [ws.image] : []);
+    return imgs.map((img, imgIndex) => ({ ws, img, wsIndex, imgIndex }));
+  });
+  // Find the start index for the selected workshop
+  const startIndex = workshops.slice(0, index).reduce((acc, ws) => acc + ((ws.images && ws.images.length) || (ws.image ? 1 : 0)), 0);
+  const [storyIndex, setStoryIndex] = React.useState(startIndex);
   const [progress, setProgress] = React.useState(0);
   const [fade, setFade] = React.useState(true);
-  const [displayIndex, setDisplayIndex] = React.useState(index);
-  const storyCount = workshops.length;
-  const FADE_DURATION = 350; // ms
+  const FADE_DURATION = 350;
 
-  // מעבר אוטומטי
   React.useEffect(() => {
     if (!open) return;
-    setProgress(0);
     setFade(true);
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          handleNext();
-          return 0;
-        }
-        return prev + 2.5;
-      });
-    }, 100);
-    return () => clearInterval(interval);
-  }, [open, displayIndex]);
-
-  // מעבר fade מקצועי
-  React.useEffect(() => {
-    if (displayIndex !== index) {
-      setFade(false); // fade out
+    let interval;
+    if (progress < 100) {
+      interval = setInterval(() => {
+        setProgress((prev) => Math.min(prev + 2.5, 100));
+      }, 100);
+    } else if (progress >= 100) {
+      // Wait a short moment before moving to next story, so the bar stays full
       const timeout = setTimeout(() => {
-        setDisplayIndex(index); // החלפת תוכן
-        setFade(true); // fade in
-        setProgress(0);
-      }, FADE_DURATION);
+        handleNext();
+      }, 120);
       return () => clearTimeout(timeout);
     }
-  }, [index, displayIndex]);
+    return () => clearInterval(interval);
+  }, [open, storyIndex, progress]);
 
-  // מניעת scroll במסך סטורי
+  // Reset progress only when storyIndex changes
+  React.useEffect(() => {
+    setProgress(0);
+  }, [storyIndex, open]);
+
+  // Reset modal and checks when storyIndex changes
+  React.useEffect(() => {
+    // setModalOpen(false); // Removed as per edit hint
+    // setChecks([false, false, false, false]); // Removed as per edit hint
+  }, [storyIndex]);
+
+  // Ensure storyIndex is set to the correct story when opening a new story
+  React.useEffect(() => {
+    setStoryIndex(startIndex);
+  }, [startIndex, open]);
+
   React.useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';
@@ -253,15 +267,13 @@ function StoryDialog({ open, workshops, index, onClose, onPrev, onNext, lang }) 
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
-  if (!open || !workshops[displayIndex]) return null;
-  const ws = workshops[displayIndex];
-  const images = ws.images || (ws.image ? [ws.image] : []);
+  if (!open || !allStories[storyIndex]) return null;
+  const { ws, img, wsIndex, imgIndex } = allStories[storyIndex];
 
-  // מעבר בלחיצה על צד המסך
+  // Click left/right to move between stories
   const handleStoryClick = (e) => {
     const x = e.nativeEvent.offsetX;
     const width = e.currentTarget.offsetWidth;
-    // RTL: ימין = קודם, שמאל = הבא
     if (x > width * 0.66) {
       handlePrev();
     } else if (x < width * 0.33) {
@@ -270,102 +282,171 @@ function StoryDialog({ open, workshops, index, onClose, onPrev, onNext, lang }) 
   };
 
   function handleNext() {
-    if (displayIndex < storyCount - 1) {
+    if (storyIndex < allStories.length - 1) {
       setFade(false);
       setTimeout(() => {
         setFade(true);
         setProgress(0);
-        setDisplayIndex(i => i + 1);
+        setStoryIndex(i => i + 1);
       }, FADE_DURATION);
     } else {
       onClose();
     }
   }
   function handlePrev() {
-    if (displayIndex > 0) {
+    if (storyIndex > 0) {
       setFade(false);
       setTimeout(() => {
         setFade(true);
         setProgress(0);
-        setDisplayIndex(i => i - 1);
+        setStoryIndex(i => i - 1);
       }, FADE_DURATION);
     }
   }
 
+  const agreementTexts = [
+    'אני מבינה שההשתתפות בסדנה היא באחריותי האישית.',
+    'אם יש לי או לתינוק/ת מצב רפואי מיוחד – אעדכן את מנחת הסדנה מראש.',
+    'אני מתחייבת לשמור על פרטיות וכבוד שאר האמהות בקבוצה.',
+    'קראתי ואני מסכימה לתקנון ולמדיניות הפרטיות של האפליקציה.'
+  ];
+  const allChecked = false; // Removed as per edit hint
+  const handleCheck = idx => (e) => {
+    // const newChecks = [...checks]; // Removed as per edit hint
+    // newChecks[idx] = e.target.checked; // Removed as per edit hint
+    // setChecks(newChecks); // Removed as per edit hint
+  };
+  const handleRegister = () => {
+    // setModalOpen(false); // Removed as per edit hint
+    setSnackbarOpen(true);
+    // setChecks([false, false, false, false]); // Removed as per edit hint
+  };
+
   return (
-    <Box
-      sx={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh', bgcolor: 'rgba(0,0,0,0.96)',
-        zIndex: 3000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        m: 0, p: 0, overflow: 'hidden',
-      }}
-      dir="rtl"
-    >
-      {/* פסי סטוריז בראש - RTL אמיתי */}
-      <Box sx={{ display: 'flex', flexDirection: 'row-reverse', gap: 1, width: '100vw', px: 2, pt: 2, position: 'absolute', top: 0, right: 0, zIndex: 10 }}>
-        {workshops.map((_, i) => (
-          <Box key={i} sx={{ flex: 1, mx: 0.5, minWidth: 0, direction: 'rtl' }}>
-            <LinearProgress
-              variant="determinate"
-              value={
-                i < displayIndex ? 100 :
-                i === displayIndex ? progress : 0
-              }
-              sx={{ height: 4, bgcolor: '#eee', borderRadius: 2, transition: 'all 0.3s linear', direction: 'rtl' }}
-            />
-          </Box>
-        ))}
-      </Box>
-      {/* Close button */}
-      <IconButton onClick={onClose} sx={{ position: 'absolute', top: 16, left: 16, zIndex: 20, bgcolor: '#fff' }}>
-        <CloseIcon />
-      </IconButton>
-      {/* תוכן סטורי במסך מלא */}
+    <>
       <Box
         sx={{
-          width: '100vw',
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: `opacity ${FADE_DURATION}ms`,
-          opacity: fade ? 1 : 0,
-          position: 'relative',
+          position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh', bgcolor: 'rgba(0,0,0,0.5)',
+          zIndex: 3000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          m: 0, p: 0, overflow: 'hidden',
         }}
-        onClick={handleStoryClick}
+        dir="rtl"
       >
-        {/* תמונה */}
-        <Box sx={{ width: '100vw', height: '55vh', bgcolor: '#eee', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src={images[0]} alt={ws.title[lang]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          {/* Prev/Next arrows */}
-          {displayIndex > 0 && (
-            <IconButton onClick={e => { e.stopPropagation(); handlePrev(); }} sx={{ position: 'absolute', top: '50%', left: 8, bgcolor: '#fff', transform: 'translateY(-50%)', zIndex: 11 }}>
-              <ChevronLeftIcon />
-            </IconButton>
-          )}
-          {displayIndex < storyCount - 1 && (
-            <IconButton onClick={e => { e.stopPropagation(); handleNext(); }} sx={{ position: 'absolute', top: '50%', right: 8, bgcolor: '#fff', transform: 'translateY(-50%)', zIndex: 11 }}>
-              <ChevronRightIcon />
-            </IconButton>
-          )}
+        <Box
+          sx={{
+            bgcolor: '#fff',
+            borderRadius: 4,
+            boxShadow: 6,
+            width: '95vw',
+            maxWidth: 420,
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            p: { xs: 1, sm: 3 },
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Progress bars for all stories */}
+          <Box sx={{ display: 'flex', flexDirection: 'row-reverse', gap: 1, width: '100%', px: 1, pt: 1, position: 'absolute', top: 0, right: 0, zIndex: 10 }}>
+            {allStories.map((_, i) => (
+              <Box key={i} sx={{ flex: 1, mx: 0.5, minWidth: 0, direction: 'rtl' }}>
+                <LinearProgress
+                  variant="determinate"
+                  value={
+                    i < storyIndex ? 100 :
+                      i === storyIndex ? progress : 0
+                  }
+                  sx={{ height: 4, bgcolor: '#eee', borderRadius: 2, transition: 'all 0.3s linear', direction: 'rtl' }}
+                />
+              </Box>
+            ))}
+          </Box>
+          {/* Close button */}
+          <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, left: 8, zIndex: 20, bgcolor: '#fff' }}>
+            <CloseIcon />
+          </IconButton>
+          {/* Story content */}
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: 420,
+              height: { xs: '40vh', sm: '55vh' },
+              maxHeight: 350,
+              bgcolor: '#eee',
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 3,
+              mt: 5,
+              mb: 2,
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            }}
+            onClick={handleStoryClick}
+          >
+            <img src={img} alt={ws.title[lang]} style={{ width: '100%', height: '100%', objectFit: 'cover', maxWidth: '100%', maxHeight: '100%' }} />
+            {/* Prev/Next arrows */}
+            {storyIndex > 0 && (
+              <IconButton onClick={e => { e.stopPropagation(); handlePrev(); }} sx={{ position: 'absolute', top: '50%', left: 8, bgcolor: '#fff', transform: 'translateY(-50%)', zIndex: 11, pointerEvents: 'auto' }}>
+                <ChevronLeftIcon />
+              </IconButton>
+            )}
+            {storyIndex < allStories.length - 1 && (
+              <IconButton onClick={e => { e.stopPropagation(); handleNext(); }} sx={{ position: 'absolute', top: '50%', right: 8, bgcolor: '#fff', transform: 'translateY(-50%)', zIndex: 11, pointerEvents: 'auto' }}>
+                <ChevronRightIcon />
+              </IconButton>
+            )}
+          </Box>
+          {/* Workshop details and button */}
+          <Box sx={{
+            flex: 1,
+            width: '100%',
+            bgcolor: 'transparent',
+            borderRadius: 0,
+            p: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            maxWidth: 420,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            boxSizing: 'border-box',
+            minHeight: 0,
+          }}>
+            <Typography
+              variant="h6"
+              sx={{ color: mainColor, fontWeight: 700, mb: 1, textAlign: 'right', width: '100%', overflowWrap: 'break-word', wordBreak: 'break-word', fontSize: { xs: '1.1rem', sm: '1.25rem' }, cursor: 'pointer', textDecoration: 'underline' }}
+              onClick={e => { e.stopPropagation(); navigate(`/workshop/${ws.id}`); }}
+            >
+              {ws.title[lang]}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'right', width: '100%', overflowWrap: 'break-word', wordBreak: 'break-word', fontSize: { xs: '0.95rem', sm: '1rem' } }}>{ws.desc[lang]}</Typography>
+            <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1, width: '100%' }}>
+              <Chip icon={<CalendarTodayIcon />} label={ws.date} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
+              <Chip icon={<AccessTimeIcon />} label={ws.time} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
+              <Chip icon={<LocationOnIcon />} label={ws.location[lang]} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
+              <Chip icon={<MamaCoinsIcon size={18} color={mainColor} />} label={`${ws.price} Mama Coins`} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
+            </Stack>
+            <Button variant="contained" fullWidth sx={{ bgcolor: mainColor, fontWeight: 600, mt: 2, maxWidth: 320, pointerEvents: 'auto' }} onClick={() => setAgreementOpen(true)}>
+              הרשמה לסדנה
+            </Button>
+          </Box>
         </Box>
-        {/* פרטי סדנה וכפתור */}
-        <Box sx={{ flex: 1, width: '100vw', bgcolor: 'rgba(255,255,255,0.98)', borderRadius: 0, p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
-          <Typography variant="h6" sx={{ color: mainColor, fontWeight: 700, mb: 1, textAlign: 'right', width: '100%' }}>{ws.title[lang]}</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'right', width: '100%' }}>{ws.desc[lang]}</Typography>
-          <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1, width: '100%' }}>
-            <Chip icon={<CalendarTodayIcon />} label={ws.date} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
-            <Chip icon={<AccessTimeIcon />} label={ws.time} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
-            <Chip icon={<LocationOnIcon />} label={ws.location[lang]} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
-            <Chip icon={<MonetizationOnIcon />} label={`${ws.price} Mama Coins`} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
-          </Stack>
-          <Button variant="contained" fullWidth sx={{ bgcolor: mainColor, fontWeight: 600, mt: 2, maxWidth: 320 }}>
-            הרשמה לסדנה
-          </Button>
-        </Box>
+        {/* Removed Dialog for agreement as per edit hint */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={2000}
+          onClose={() => setSnackbarOpen(false)}
+          message="נרשמת בהצלחה לסדנה!"
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        />
       </Box>
-    </Box>
+    </>
   );
 }
 
@@ -464,7 +545,51 @@ function HotWorkshopCard({ workshop, lang }) {
   );
 }
 
-function HomeScreen({ myWorkshops, setMyWorkshops, setPrefill }) {
+function ExampleWorkshopPage() {
+  const { id } = useParams();
+  return (
+    <Box sx={{ p: 4, textAlign: 'center' }}>
+      <Typography variant="h4" sx={{ mb: 2 }}>דף סדנה לדוגמה</Typography>
+      <Typography variant="h6">מזהה סדנה: {id}</Typography>
+      <Typography variant="body1" sx={{ mt: 2 }}>כאן בעתיד יוצגו פרטי הסדנה, הרשמה, ועוד.</Typography>
+    </Box>
+  );
+}
+
+function MamaCoinsScreen() {
+  // Example data
+  const balance = 2690;
+  const actions = [
+    { id: 1, desc: 'אירוח סדנה: סדנת תנועה', amount: 200, date: '01.07.2025' },
+    { id: 2, desc: 'השתתפות בסדנה: סדנת יוגה', amount: 50, date: '28.06.2025' },
+    { id: 3, desc: 'המלצה על חברה', amount: 100, date: '20.06.2025' },
+  ];
+  return (
+    <Container maxWidth="sm" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <MamaCoinsIcon size={32} color={mainColor} />
+        <Typography variant="h5" sx={{ color: mainColor, fontWeight: 700 }}>
+          {balance} מאמא קוינס
+        </Typography>
+      </Box>
+      <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>פעולות אחרונות:</Typography>
+      <Box sx={{ mb: 4 }}>
+        {actions.map(a => (
+          <Box key={a.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, p: 1, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+            <Typography variant="body1">{a.desc}</Typography>
+            <Typography variant="body2" sx={{ color: mainColor, fontWeight: 700 }}>+{a.amount}</Typography>
+            <Typography variant="caption" sx={{ color: '#888', ml: 2 }}>{a.date}</Typography>
+          </Box>
+        ))}
+      </Box>
+      <Button variant="contained" sx={{ bgcolor: mainColor, fontWeight: 600, fontSize: '1.1rem' }} disabled>
+        רכישת מאמא קוינס
+      </Button>
+    </Container>
+  );
+}
+
+function HomeScreen({ myWorkshops, setMyWorkshops, setPrefill, setAgreementOpen }) {
   const [lang, setLang] = useState('he');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
@@ -526,7 +651,7 @@ function HomeScreen({ myWorkshops, setMyWorkshops, setPrefill }) {
 
   // HomeScreen חוזר למצבו הקודם (רשימות אנכיות בלבד)
   return (
-    <Container maxWidth="sm" sx={{ bgcolor: "#faf7f2", px: 2, py: 3, overflowY: 'visible', overflowX: 'hidden' }} dir={dir}>
+    <Container maxWidth="sm" sx={{ bgcolor: "#faf7f2", px: 2, py: 3, overflowY: 'visible', overflowX: 'hidden', position: 'relative', pb: 8 }} dir={dir}>
       <AppBar position="static" color="inherit" elevation={0} sx={{ mb: 2, borderBottom: '1px solid #eee' }}>
         <Toolbar>
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
@@ -575,6 +700,7 @@ function HomeScreen({ myWorkshops, setMyWorkshops, setPrefill }) {
           onPrev={() => setStoryIndex(i => Math.max(0, i - 1))}
           onNext={() => setStoryIndex(i => Math.min(hotWorkshops.length - 1, i + 1))}
           lang={lang}
+          setAgreementOpen={setAgreementOpen}
         />
       )}
       {/* תוכן עיקרי - רשימות */}
@@ -584,16 +710,19 @@ function HomeScreen({ myWorkshops, setMyWorkshops, setPrefill }) {
           סדנאות באזור שלי
         </Typography>
         {/* סליידר אופקי לסדנאות באזור שלי */}
-        <Box sx={{
-          display: 'block',
-          overflowX: 'auto',
-          overflowY: 'hidden',
-          whiteSpace: 'nowrap',
-          maxWidth: '100vw', // חשוב למובייל
-          px: 0.5,
-          pb: 1,
-          scrollSnapType: 'x mandatory',
-        }}>
+        <Box
+          className="workshop-scrollbar"
+          sx={{
+            display: 'block',
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            whiteSpace: 'nowrap',
+            maxWidth: '100vw', // חשוב למובייל
+            px: 0.5,
+            pb: 1,
+            scrollSnapType: 'x mandatory',
+          }}
+        >
           {areaWorkshops.map(ws => (
             <Box key={ws.id} sx={{ display: 'inline-block', verticalAlign: 'top', mr: 2, scrollSnapAlign: 'start' }}>
               <Link to={`/workshop/${ws.id}`} style={{ textDecoration: 'none' }}>
@@ -602,22 +731,26 @@ function HomeScreen({ myWorkshops, setMyWorkshops, setPrefill }) {
             </Box>
           ))}
         </Box>
-        <Divider sx={{ my: 3 }} />
+        {/* מרווח עדין במקום Divider */}
+        <Box sx={{ height: 16 }} />
         <Typography variant="h6" sx={{ color: mainColor, mb: 2, textAlign: 'right', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
           <span role="img" aria-label="להבה" style={{ fontSize: 22, marginLeft: 6 }}>🔥</span>
           סדנאות חמות
         </Typography>
         {/* סליידר אופקי לסדנאות חמות */}
-        <Box sx={{
-          display: 'block',
-          overflowX: 'auto',
-          overflowY: 'hidden',
-          whiteSpace: 'nowrap',
-          maxWidth: '100vw', // חשוב למובייל
-          px: 0.5,
-          pb: 1,
-          scrollSnapType: 'x mandatory',
-        }}>
+        <Box
+          className="workshop-scrollbar"
+          sx={{
+            display: 'block',
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            whiteSpace: 'nowrap',
+            maxWidth: '100vw', // חשוב למובייל
+            px: 0.5,
+            pb: 1,
+            scrollSnapType: 'x mandatory',
+          }}
+        >
           {hotList.map(ws => (
             <Box key={ws.id} sx={{ display: 'inline-block', verticalAlign: 'top', mr: 2, scrollSnapAlign: 'start' }}>
               <Link to={`/workshop/${ws.id}`} style={{ textDecoration: 'none' }}>
@@ -627,15 +760,27 @@ function HomeScreen({ myWorkshops, setMyWorkshops, setPrefill }) {
           ))}
         </Box>
       </Box>
-      <Divider sx={{ my: 3 }} />
-      <Paper sx={{ mx: 0, p: 3, borderRadius: 3, bgcolor: accentColor }}>
-        <Typography variant="subtitle2" sx={{ color: mainColor, fontWeight: 700, textAlign: 'right', mb: 1 }}>{texts[lang].mamaCoins}</Typography>
-        <Typography variant="body2" sx={{ textAlign: 'right', mb: 2 }}>{texts[lang].balance}</Typography>
-        <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained" sx={{ bgcolor: mainColor, textTransform: 'none' }}>{texts[lang].convert}</Button>
-          <Button variant="outlined" sx={{ color: mainColor, borderColor: mainColor, textTransform: 'none' }}>{texts[lang].buy}</Button>
-        </Stack>
-      </Paper>
+      {/* Mama Coins display at top left, clickable and links to /mama-coins */}
+      <Box component={Link} to="/mama-coins" sx={{ position: 'absolute', top: 16, left: 16, display: 'flex', alignItems: 'center', borderRadius: 3, px: 2, py: 0.5, boxShadow: 1, textDecoration: 'none', cursor: 'pointer' }}>
+        <MamaCoinsIcon size={22} color={mainColor} />
+        <Typography variant="subtitle2" sx={{ color: mainColor, fontWeight: 700, fontSize: '1.1rem' }}>2690</Typography>
+      </Box>
+      {/* Call to Action: Create Workshop */}
+      <Box sx={{ mt: 4, bgcolor: '#faf7f2', pt: 2, pb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography variant="h6" sx={{ color: mainColor, fontWeight: 700, mb: 1, textAlign: 'center' }}>
+          רוצה ליצור סדנה משלך?
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#555', mb: 2, textAlign: 'center', maxWidth: 320 }}>
+          יש לך רעיון לסדנה, או שאת רוצה שנעזור לך למצוא רעיון? לחצי על הכפתור והתחילי בתהליך פשוט ומהנה!
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{ bgcolor: mainColor, fontWeight: 700, fontSize: '1.1rem', borderRadius: 3, px: 4, py: 1.2, boxShadow: 2 }}
+          onClick={() => navigate('/create-workshop?help=1')}
+        >
+          יצירת סדנה חדשה
+        </Button>
+      </Box>
     </Container>
   );
 }
@@ -649,89 +794,168 @@ function BottomNavigation({ currentPath }) {
       position: "fixed", bottom: 0, left: 0, right: 0, bgcolor: "#fff", borderTop: "1px solid #eee",
       display: "flex", justifyContent: "space-around", py: 1, zIndex: 100
     }}>
-      <Button 
-        sx={{ 
-          color: currentPath === '/profile' ? mainColor : '#666', 
-          flexDirection: "column", 
+      <Box
+        sx={{
+          flexDirection: "column",
           minWidth: "auto",
-          '&:hover': { bgcolor: 'transparent' }
+          color: '#999',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1
+        }}
+      >
+        <img
+          src={liaddorImg}
+          alt="Profile"
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: '50%',
+            objectFit: 'cover',
+            marginBottom: 2,
+            border: '1.5px solid #ccc',
+            background: '#fff'
+          }}
+        />
+        <div style={{ fontSize: "0.7rem" }}>הפרופיל שלי</div>
+      </Box>
+      <Button
+        sx={{
+          color: currentPath === '/profile' ? mainColor : '#666',
+          flexDirection: "column",
+          minWidth: "auto",
+          '&:hover': { bgcolor: 'transparent' },
+          flex: 1
         }}
         onClick={() => navigate('/profile')}
       >
-        <Avatar 
-          src={liaddorImg}
-          sx={{ 
-            width: 24, 
+        <img
+          src={liuLogo}
+          alt="LIU Logo"
+          style={{
+            width: 24,
             height: 24,
-            border: currentPath === '/profile' ? '2px solid #b39ddb' : 'none'
+            borderRadius: '50%',
+            border: currentPath === '/profile' ? '2px solid #b39ddb' : 'none',
+            background: '#fff',
+            objectFit: 'cover',
+            marginBottom: 2
           }}
         />
         <div style={{ fontSize: "0.7rem" }}>{texts[lang].profile}</div>
       </Button>
-      <Button 
-        sx={{ 
-          color: currentPath === '/calendar' ? mainColor : '#666', 
-          flexDirection: "column", 
+      <Button
+        sx={{
+          color: currentPath === '/calendar' ? mainColor : '#666',
+          flexDirection: "column",
           minWidth: "auto",
-          '&:hover': { bgcolor: 'transparent' }
+          '&:hover': { bgcolor: 'transparent' },
+          flex: 1
         }}
         onClick={() => navigate('/calendar')}
       >
         <CalendarTodayIcon />
         <div style={{ fontSize: "0.7rem" }}>{texts[lang].calendar}</div>
       </Button>
-      <Button 
-        sx={{ 
-          color: currentPath === '/search' ? mainColor : '#666', 
-          flexDirection: "column", 
+      <Button
+        sx={{
+          color: currentPath === '/search' ? mainColor : '#666',
+          flexDirection: "column",
           minWidth: "auto",
-          '&:hover': { bgcolor: 'transparent' }
+          '&:hover': { bgcolor: 'transparent' },
+          flex: 1
         }}
         onClick={() => navigate('/search')}
       >
         <SearchIcon />
         <div style={{ fontSize: "0.7rem" }}>{texts[lang].search}</div>
       </Button>
-      <Button 
-        sx={{ 
-          color: currentPath === '/' ? mainColor : '#666', 
-          flexDirection: "column", 
+      <Button
+        sx={{
+          color: currentPath === '/' ? mainColor : '#666',
+          flexDirection: "column",
           minWidth: "auto",
-          '&:hover': { bgcolor: 'transparent' }
+          '&:hover': { bgcolor: 'transparent' },
+          flex: 1
         }}
         onClick={() => navigate('/')}
       >
-        <img src={liuLogo} alt="LIU" style={{ height: 24, width: 24, marginBottom: 2 }} />
-        <div style={{ fontSize: "0.7rem" }}>ליו</div>
+        <HomeIcon style={{ height: 24, width: 24, marginBottom: 2 }} />
+        <div style={{ fontSize: "0.7rem" }}>בית</div>
       </Button>
     </Box>
   );
 }
 
-function AppContent() {
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
+function AppContent({ setAgreementOpen }) {
   const [myWorkshops, setMyWorkshops] = useState([...initialMyWorkshops]);
   const [prefill, setPrefill] = useState(null);
   const location = useLocation();
 
   return (
     <>
+      <ScrollToTop />
       <Routes>
-        <Route path="/" element={<HomeScreen myWorkshops={myWorkshops} setMyWorkshops={setMyWorkshops} setPrefill={setPrefill} />} />
+        <Route path="/" element={<HomeScreen myWorkshops={myWorkshops} setMyWorkshops={setMyWorkshops} setPrefill={setPrefill} setAgreementOpen={setAgreementOpen} />} />
         <Route path="/profile" element={<ProfileScreen myWorkshops={myWorkshops} setMyWorkshops={setMyWorkshops} setPrefill={setPrefill} />} />
         <Route path="/calendar" element={<CalendarScreen />} />
         <Route path="/search" element={<SearchScreen />} />
         <Route path="/create-workshop" element={<CreateWorkshop myWorkshops={myWorkshops} setMyWorkshops={setMyWorkshops} prefill={prefill} />} />
+        <Route path="/workshop/demo1" element={<ExampleWorkshopPage />} />
+        <Route path="/workshop/demo2" element={<ExampleWorkshopPage />} />
+        <Route path="/workshop/demo3" element={<ExampleWorkshopPage />} />
+        <Route path="/workshop/demo4" element={<ExampleWorkshopPage />} />
         <Route path="/workshop/:id" element={<WorkshopDetails />} />
+        <Route path="/mama-coins" element={<MamaCoinsScreen />} />
       </Routes>
       <BottomNavigation currentPath={location.pathname} />
     </>
   );
 }
 
+// Custom icon: 3 stacked stars for Mama Coins
+export function MamaCoinsIcon({ size = 22, color = mainColor, ...props }) {
+  return (
+    <span style={{ display: 'inline-block', verticalAlign: 'middle', lineHeight: 0 }} {...props}>
+      <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="16,3 20,12 30,12 22,18 25,28 16,22 7,28 10,18 2,12 12,12" fill={color} fillOpacity="0.9" />
+      </svg>
+    </span>
+  );
+}
+
 export default function App() {
+  const [agreementOpen, setAgreementOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const handleAgreementConfirm = () => {
+    setAgreementOpen(false);
+    setSnackbarOpen(true);
+    // כאן אפשר להוסיף לוגיקת הרשמה אמיתית
+  };
   return (
     <Router>
-      <AppContent />
+      <AppContent setAgreementOpen={setAgreementOpen} />
+      <RegistrationAgreementDialog
+        open={agreementOpen}
+        onClose={() => setAgreementOpen(false)}
+        onConfirm={handleAgreementConfirm}
+      />
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={() => setSnackbarOpen(false)}
+        message="נרשמת בהצלחה לסדנה!"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Router>
   );
 }

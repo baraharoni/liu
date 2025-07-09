@@ -87,7 +87,7 @@ const testEvent = {
   id: 999,
   title: { he: "בדיקת אירוע", en: "Test Event" },
   desc: { he: "אירוע בדיקה להיום", en: "Test event for today" },
-  date: `${dd(today.getDate())}.${dd(today.getMonth()+1)}.${today.getFullYear()}`,
+  date: `${dd(today.getDate())}.${dd(today.getMonth() + 1)}.${today.getFullYear()}`,
   time: "12:00",
   location: { he: "תל אביב", en: "Tel Aviv" },
   price: 0,
@@ -95,7 +95,7 @@ const testEvent = {
   status: "נרשמתי",
   category: { he: "בדיקה", en: "Test" }
 };
-function dd(n) { return n < 10 ? '0'+n : ''+n; }
+function dd(n) { return n < 10 ? '0' + n : '' + n; }
 
 // שילוב כל הפעילויות
 const allActivities = [...myUpcomingActivities, ...additionalActivities, testEvent];
@@ -107,9 +107,9 @@ function ActivityCard({ activity, lang }) {
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>{activity.title[lang]}</Typography>
-          <Chip 
-            label={activity.status} 
-            size="small" 
+          <Chip
+            label={activity.status}
+            size="small"
             sx={{ bgcolor: mainColor, color: 'white', fontWeight: 600 }}
           />
         </Box>
@@ -131,10 +131,10 @@ function ActivityCard({ activity, lang }) {
           </Box>
         </Stack>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-          <Chip 
-            label={activity.category[lang]} 
-            size="small" 
-            variant="outlined" 
+          <Chip
+            label={activity.category[lang]}
+            size="small"
+            variant="outlined"
             sx={{ borderColor: mainColor, color: mainColor }}
           />
           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: mainColor }}>
@@ -174,9 +174,9 @@ function CalendarScreen() {
       console.log('Comparing:', activityDate, 'with', clickedDate);
       return activityDate === clickedDate;
     });
-    
+
     console.log('Activities on date:', activitiesOnDate);
-    
+
     if (activitiesOnDate.length > 0) {
       setSelectedDate(clickedDate);
       setSelectedActivities(activitiesOnDate);
@@ -206,7 +206,7 @@ function CalendarScreen() {
           </Box>
         </Toolbar>
       </AppBar>
-      
+
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <ToggleButtonGroup
           value={view}
@@ -239,7 +239,7 @@ function CalendarScreen() {
           </ButtonGroup>
         )}
       </Box>
-      
+
       {view === 'calendar' ? (
         <Paper sx={{ p: 1, borderRadius: 2, boxShadow: 2, bgcolor: '#fff' }}>
           <FullCalendar
@@ -263,9 +263,8 @@ function CalendarScreen() {
             }}
             datesSet={(arg) => handleCalendarViewChange(arg.view.type)}
             dayMaxEvents={true}
-            eventContent={calendarView === 'dayGridMonth' ? undefined : renderEventContent}
+            eventContent={calendarView === 'dayGridMonth' ? renderMonthEventDot : renderEventContent}
             dayCellContent={renderDayCell}
-            eventDisplay={calendarView === 'dayGridMonth' ? 'none' : 'auto'}
           />
         </Paper>
       ) : (
@@ -306,9 +305,9 @@ function CalendarScreen() {
                   primary={activity.title[lang]}
                   secondary={`${activity.time} • ${activity.location[lang]}`}
                 />
-                <Chip 
-                  label={activity.category[lang]} 
-                  size="small" 
+                <Chip
+                  label={activity.category[lang]}
+                  size="small"
                   sx={{ bgcolor: mainColor, color: 'white' }}
                 />
               </ListItem>
@@ -330,6 +329,13 @@ function renderEventContent(eventInfo) {
   );
 }
 
+// Minimal event dot for month view
+function renderMonthEventDot(eventInfo) {
+  return (
+    <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 4, background: '#b39ddb', margin: 1 }} title={eventInfo.event.title}></span>
+  );
+}
+
 // הצגת מספר פעילויות על גבי היום
 function renderDayCell(arg) {
   const dateStr = arg.date.toISOString().split('T')[0];
@@ -337,7 +343,7 @@ function renderDayCell(arg) {
     const activityDate = activity.date.split('.').reverse().join('-');
     return activityDate === dateStr;
   });
-  
+
   if (activitiesOnDay.length > 0) {
     return (
       <Box sx={{ position: 'relative', height: '100%' }}>
@@ -364,7 +370,7 @@ function renderDayCell(arg) {
       </Box>
     );
   }
-  
+
   return arg.dayNumberText;
 }
 

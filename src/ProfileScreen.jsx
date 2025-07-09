@@ -3,7 +3,6 @@ import {
   Box, Typography, Button, Paper, Tabs, Tab, Divider, Stack,
   AppBar, Toolbar, Card, CardContent, CardMedia, List, ListItem, ListItemAvatar, ListItemText, Avatar, Container
 } from '@mui/material';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import liuLogo from './assets/liu-logo.png';
 import UserProfileHeader from './UserProfileHeader';
 import { useNavigate, Link } from 'react-router-dom';
@@ -81,13 +80,13 @@ function WorkshopCard({ workshop, lang, showParticipants }) {
                   <ListItemAvatar sx={{ minWidth: 32 }}>
                     <Avatar src={p.avatar} sx={{ width: 24, height: 24 }} />
                   </ListItemAvatar>
-                  <ListItemText 
-                    primary={p.name[lang]} 
-                    sx={{ 
-                      '& .MuiListItemText-primary': { 
+                  <ListItemText
+                    primary={p.name[lang]}
+                    sx={{
+                      '& .MuiListItemText-primary': {
                         fontSize: '0.875rem',
                         textAlign: 'right'
-                      } 
+                      }
                     }}
                   />
                 </ListItem>
@@ -122,7 +121,7 @@ export default function ProfileScreen({ myWorkshops, setMyWorkshops, setPrefill 
 
       {/* קומפוננטת פרופיל משופרת */}
       <Box sx={{ px: 2, py: 2 }}>
-        <UserProfileHeader onEdit={() => {}} />
+        <UserProfileHeader onEdit={() => { }} />
       </Box>
 
       {/* טאבים על רוחב מלא וצמודים למעלה */}
@@ -130,8 +129,8 @@ export default function ProfileScreen({ myWorkshops, setMyWorkshops, setPrefill 
         <Tabs
           value={tab}
           onChange={(_, v) => setTab(v)}
-          sx={{ 
-            '& .MuiTabs-indicator': { 
+          sx={{
+            '& .MuiTabs-indicator': {
               background: mainColor,
               height: 3
             }
@@ -139,22 +138,22 @@ export default function ProfileScreen({ myWorkshops, setMyWorkshops, setPrefill 
           textColor="primary"
           variant="fullWidth"
         >
-          <Tab 
-            label={texts[lang].privateTab} 
-            sx={{ 
-              color: tab === 0 ? mainColor : "#666", 
+          <Tab
+            label={texts[lang].privateTab}
+            sx={{
+              color: tab === 0 ? mainColor : "#666",
               fontWeight: 600,
               fontSize: '0.9rem',
               textTransform: 'none'
-            }} 
+            }}
           />
-          <Tab 
-            label={texts[lang].businessTab} 
-            sx={{ 
+          <Tab
+            label={texts[lang].businessTab}
+            sx={{
               color: tab === 1 ? mainColor : "#666",
               fontSize: '0.9rem',
               textTransform: 'none'
-            }} 
+            }}
           />
         </Tabs>
       </Box>

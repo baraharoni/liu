@@ -3,7 +3,7 @@ import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-map
 import { Box, Typography, Button, Chip } from '@mui/material';
 import { availableWorkshops } from './workshopData';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import { MamaCoinsIcon } from './App';
 import { useNavigate } from 'react-router-dom';
 
 const mainColor = '#b39ddb';
@@ -105,7 +105,7 @@ export default function WorkshopMap() {
               {selected.location.he}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <MonetizationOnIcon sx={{ fontSize: 18, color: mainColor }} />
+              <MamaCoinsIcon size={18} color={mainColor} />
               <Typography variant="body2" sx={{ fontWeight: 600, color: mainColor }}>
                 {selected.price} Mama Coins
               </Typography>

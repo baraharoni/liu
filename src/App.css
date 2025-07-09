@@ -2,6 +2,8 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
+  padding-bottom: 80px;
+  /* Add space for bottom navigation */
 }
 
 .logo {
@@ -10,9 +12,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -21,6 +25,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -38,4 +43,25 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Custom horizontal scrollbar for workshop sliders */
+.workshop-scrollbar {
+  scrollbar-color: #e0e0e0 #faf7f2;
+  /* thumb track */
+  scrollbar-width: thin;
+}
+
+.workshop-scrollbar::-webkit-scrollbar {
+  height: 8px;
+  background: #faf7f2;
+}
+
+.workshop-scrollbar::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+.workshop-scrollbar::-webkit-scrollbar-track {
+  background: #faf7f2;
 }

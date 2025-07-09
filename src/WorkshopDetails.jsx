@@ -10,17 +10,17 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import { MamaCoinsIcon } from './App';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import liaddorImg from './assets/liaddor.jpg';
 import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  initialMyWorkshops, 
-  attendedWorkshops, 
-  futureWorkshops, 
-  myUpcomingActivities, 
-  availableWorkshops 
+import {
+  initialMyWorkshops,
+  attendedWorkshops,
+  futureWorkshops,
+  myUpcomingActivities,
+  availableWorkshops
 } from './workshopData';
 
 const mainColor = '#b39ddb';
@@ -60,6 +60,7 @@ export default function WorkshopDetails() {
   const [submitting, setSubmitting] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [isAttended, setIsAttended] = useState(false); // New state for attendance status
 
   useEffect(() => {
     const allWorkshops = [
@@ -72,6 +73,12 @@ export default function WorkshopDetails() {
     const foundWorkshop = allWorkshops.find(ws => String(ws.id) === String(id));
     setWorkshop(foundWorkshop);
     setLoading(false);
+
+    // Check if the current user attended this workshop
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && foundWorkshop) {
+      setIsAttended(user.attendedWorkshops.some(ws => String(ws.id) === String(id)));
+    }
   }, [id]);
 
   const handleAddComment = () => {
@@ -159,18 +166,18 @@ export default function WorkshopDetails() {
           sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
         {/* Overlay with back button */}
-        <Box sx={{ 
-          position: 'absolute', 
-          top: 0, 
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
           right: dir === 'rtl' ? 0 : 'unset',
           left: dir === 'rtl' ? 'unset' : 0,
           background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), transparent)',
           p: 2
         }}>
-          <IconButton 
-            onClick={() => navigate(-1)} 
-            sx={{ 
-              bgcolor: 'rgba(255,255,255,0.9)', 
+          <IconButton
+            onClick={() => navigate(-1)}
+            sx={{
+              bgcolor: 'rgba(255,255,255,0.9)',
               '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
             }}
           >
@@ -210,10 +217,10 @@ export default function WorkshopDetails() {
         )}
         {/* Image indicators */}
         {images.length > 1 && (
-          <Box sx={{ 
-            position: 'absolute', 
-            bottom: 16, 
-            left: '50%', 
+          <Box sx={{
+            position: 'absolute',
+            bottom: 16,
+            left: '50%',
             transform: 'translateX(-50%)',
             display: 'flex',
             gap: 1
@@ -248,28 +255,28 @@ export default function WorkshopDetails() {
             </Typography>
             {/* Quick info chips */}
             <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }} dir={dir}>
-              <Chip 
-                icon={<PersonIcon sx={{ ml: dir === 'rtl' ? 0.5 : 0, mr: dir === 'rtl' ? 0 : 0.5 }} />} 
-                label={host} 
-                variant="outlined" 
+              <Chip
+                icon={<PersonIcon sx={{ ml: dir === 'rtl' ? 0.5 : 0, mr: dir === 'rtl' ? 0 : 0.5 }} />}
+                label={host}
+                variant="outlined"
                 sx={{ borderColor: mainColor, color: mainColor, flexDirection: dir === 'rtl' ? 'row-reverse' : 'row' }}
               />
-              <Chip 
-                icon={<CalendarTodayIcon sx={{ ml: dir === 'rtl' ? 0.5 : 0, mr: dir === 'rtl' ? 0 : 0.5 }} />} 
-                label={date} 
-                variant="outlined" 
+              <Chip
+                icon={<CalendarTodayIcon sx={{ ml: dir === 'rtl' ? 0.5 : 0, mr: dir === 'rtl' ? 0 : 0.5 }} />}
+                label={date}
+                variant="outlined"
                 sx={{ borderColor: mainColor, color: mainColor, flexDirection: dir === 'rtl' ? 'row-reverse' : 'row' }}
               />
-              <Chip 
-                icon={<AccessTimeIcon sx={{ ml: dir === 'rtl' ? 0.5 : 0, mr: dir === 'rtl' ? 0 : 0.5 }} />} 
-                label={time} 
-                variant="outlined" 
+              <Chip
+                icon={<AccessTimeIcon sx={{ ml: dir === 'rtl' ? 0.5 : 0, mr: dir === 'rtl' ? 0 : 0.5 }} />}
+                label={time}
+                variant="outlined"
                 sx={{ borderColor: mainColor, color: mainColor, flexDirection: dir === 'rtl' ? 'row-reverse' : 'row' }}
               />
-              <Chip 
-                icon={<MonetizationOnIcon sx={{ ml: dir === 'rtl' ? 0.5 : 0, mr: dir === 'rtl' ? 0 : 0.5 }} />} 
-                label={`${price} Mama Coins`} 
-                variant="outlined" 
+              <Chip
+                icon={<MamaCoinsIcon size={18} color={mainColor} style={{ marginLeft: dir === 'rtl' ? 4 : 0, marginRight: dir === 'rtl' ? 0 : 4 }} />}
+                label={`${price} Mama Coins`}
+                variant="outlined"
                 sx={{ borderColor: mainColor, color: mainColor, flexDirection: dir === 'rtl' ? 'row-reverse' : 'row' }}
               />
             </Stack>
@@ -284,17 +291,17 @@ export default function WorkshopDetails() {
                 <Typography variant="body2" sx={{ color: mainColor, fontWeight: 600, textAlign: dir === 'rtl' ? 'right' : 'left' }}>
                   משתתפות: {participants}/{maxParticipants}
                 </Typography>
-                <Box sx={{ 
-                  flexGrow: 1, 
-                  height: 8, 
-                  bgcolor: '#f0f0f0', 
+                <Box sx={{
+                  flexGrow: 1,
+                  height: 8,
+                  bgcolor: '#f0f0f0',
                   borderRadius: 4,
                   overflow: 'hidden'
                 }}>
-                  <Box sx={{ 
-                    width: `${(participants / maxParticipants) * 100}%`, 
-                    height: '100%', 
-                    bgcolor: mainColor 
+                  <Box sx={{
+                    width: `${(participants / maxParticipants) * 100}%`,
+                    height: '100%',
+                    bgcolor: mainColor
                   }} />
                 </Box>
               </Box>
@@ -317,14 +324,14 @@ export default function WorkshopDetails() {
             ) : (
               <Stack spacing={2} sx={{ mb: 3 }}>
                 {comments.map((c) => (
-                  <Box key={c.id} sx={{ 
-                    display: 'flex', 
-                    alignItems: 'flex-start', 
-                    gap: 1.5, 
-                    bgcolor: c.text ? '#f7f3fd' : '#f5f5f5', 
-                    p: 2, 
-                    borderRadius: 2, 
-                    flexDirection: dir === 'rtl' ? 'row-reverse' : 'row' 
+                  <Box key={c.id} sx={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 1.5,
+                    bgcolor: c.text ? '#f7f3fd' : '#f5f5f5',
+                    p: 2,
+                    borderRadius: 2,
+                    flexDirection: dir === 'rtl' ? 'row-reverse' : 'row'
                   }}>
                     <Avatar src={c.user.avatar} sx={{ width: 40, height: 40, ml: dir === 'rtl' ? 0 : 2, mr: dir === 'rtl' ? 2 : 0 }} />
                     <Box sx={{ flexGrow: 1 }}>
@@ -342,34 +349,38 @@ export default function WorkshopDetails() {
                 ))}
               </Stack>
             )}
-            {/* Add comment form */}
-            <Divider sx={{ my: 2 }} />
-            <Stack direction="row" spacing={1} alignItems="flex-end" dir={dir}>
-              <Avatar src={liaddorImg} sx={{ width: 40, height: 40 }} />
-              <TextField
-                fullWidth
-                multiline
-                rows={2}
-                placeholder="הוסיפי תגובה..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                variant="outlined"
-                size="small"
-                inputProps={{ style: { textAlign: dir === 'rtl' ? 'right' : 'left' } }}
-              />
-              <IconButton
-                onClick={handleAddComment}
-                disabled={!newComment.trim() || submitting}
-                sx={{ 
-                  bgcolor: mainColor, 
-                  color: 'white',
-                  '&:hover': { bgcolor: mainColor },
-                  '&:disabled': { bgcolor: '#ccc' }
-                }}
-              >
-                <SendIcon />
-              </IconButton>
-            </Stack>
+            {/* Add comment form - only for attended workshops */}
+            {isAttended && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Stack direction="row" spacing={1} alignItems="flex-end" dir={dir}>
+                  <Avatar src={liaddorImg} sx={{ width: 40, height: 40 }} />
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={2}
+                    placeholder="הוסיפי תגובה..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    variant="outlined"
+                    size="small"
+                    inputProps={{ style: { textAlign: dir === 'rtl' ? 'right' : 'left' } }}
+                  />
+                  <IconButton
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim() || submitting}
+                    sx={{
+                      bgcolor: mainColor,
+                      color: 'white',
+                      '&:hover': { bgcolor: mainColor },
+                      '&:disabled': { bgcolor: '#ccc' }
+                    }}
+                  >
+                    <SendIcon />
+                  </IconButton>
+                </Stack>
+              </>
+            )}
           </Box>
         </Paper>
       </Container>

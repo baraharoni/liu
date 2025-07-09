@@ -37,62 +37,36 @@ const categories = [
 function WorkshopCard({ workshop, lang }) {
   const availableSpots = workshop.maxParticipants - workshop.participants;
   const isFull = availableSpots <= 0;
-  
+
   return (
-    <Card sx={{ mb: 2, borderRadius: 2, width: '100%' }}>
-      <Box sx={{ position: 'relative' }}>
-        <CardMedia component="img" height="120" image={workshop.image} alt={workshop.title[lang]} />
-        <Chip
-          label={isFull ? 'מלא' : `${availableSpots} מקומות`}
+    <Card sx={{ mb: 1.2, borderRadius: 2, width: '100%', boxShadow: 0, border: '1px solid #eee', display: 'flex', flexDirection: 'row', alignItems: 'center', px: 1, py: 1.2 }}>
+      <CardMedia component="img" image={workshop.image} alt={workshop.title[lang]} sx={{ width: 64, height: 64, borderRadius: 2, mr: 1 }} />
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: 15, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{workshop.title[lang]}</Typography>
+          <Chip label={isFull ? 'מלא' : `${availableSpots} מקומות`} size="small" sx={{ bgcolor: isFull ? '#f44336' : mainColor, color: 'white', fontWeight: 600, minWidth: 44, height: 22, fontSize: 12, px: 0.5 }} />
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <CalendarTodayIcon sx={{ fontSize: 14, color: mainColor }} />
+          <Typography variant="caption" sx={{ fontSize: 13 }}>{workshop.date} • {workshop.time}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <LocationOnIcon sx={{ fontSize: 14, color: mainColor }} />
+          <Typography variant="caption" sx={{ fontSize: 13 }}>{workshop.location[lang]}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+          <Chip label={categories.find(c => c.id === workshop.category)?.label[lang]} size="small" variant="outlined" sx={{ borderColor: mainColor, color: mainColor, fontSize: 12, height: 20, px: 0.5 }} />
+          <Typography variant="caption" sx={{ fontWeight: 600, color: mainColor, fontSize: 13 }}>{workshop.price} Mama Coins</Typography>
+        </Box>
+        <Button
+          variant="contained"
           size="small"
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            bgcolor: isFull ? '#f44336' : mainColor,
-            color: 'white',
-            fontWeight: 600,
-            minWidth: 60,
-            zIndex: 2
-          }}
-        />
-      </Box>
-      <CardContent sx={{ py: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, flex: 1, mr: 1 }}>{workshop.title[lang]}</Typography>
-        </Box>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <CalendarTodayIcon sx={{ fontSize: 16, color: mainColor }} />
-          <Typography variant="body2">{workshop.date} • {workshop.time}</Typography>
-        </Box>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <LocationOnIcon sx={{ fontSize: 16, color: mainColor }} />
-          <Typography variant="body2">{workshop.location[lang]}</Typography>
-        </Box>
-        
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
-          <Chip 
-            label={categories.find(c => c.id === workshop.category)?.label[lang]} 
-            size="small" 
-            variant="outlined" 
-            sx={{ borderColor: mainColor, color: mainColor }}
-          />
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: mainColor }}>
-            {workshop.price} Mama Coins
-          </Typography>
-        </Box>
-        
-        <Button 
-          variant="contained" 
-          fullWidth 
           disabled={isFull}
-          sx={{ mt: 1.5, bgcolor: mainColor, fontWeight: 600 }}
+          sx={{ mt: 0.5, bgcolor: mainColor, fontWeight: 600, fontSize: 13, minWidth: 0, px: 2, py: 0.2, borderRadius: 2, boxShadow: 0 }}
         >
           {isFull ? (lang === 'he' ? 'מלא' : 'Full') : (lang === 'he' ? 'הרשמה' : 'Register')}
         </Button>
-      </CardContent>
+      </Box>
     </Card>
   );
 }
@@ -123,13 +97,27 @@ function SearchScreen() {
 
   // State for sort menu
   const [sortMenuAnchor, setSortMenuAnchor] = React.useState(null);
+  // State for baby age filter
+  const [babyAge, setBabyAge] = useState('all');
+  const [babyAgeMenuAnchor, setBabyAgeMenuAnchor] = useState(null);
+  const babyAgeOptions = [
+    { id: 'all', label: 'כל הגילאים' },
+    { id: 'pregnancy', label: 'הריון' },
+    { id: '0-3', label: '0-3' },
+    { id: '3-6', label: '3-6' },
+    { id: '6-12', label: '6-12' },
+    { id: '1-2', label: '1-2' },
+    { id: '3+', label: '3+' },
+  ];
+  // State for filter visibility
+  const [filtersOpen, setFiltersOpen] = useState(true);
 
   console.log('SearchScreen - availableWorkshops:', availableWorkshops);
 
   let filteredWorkshops = availableWorkshops.filter(workshop => {
     const matchesSearch = workshop.title[lang].toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         workshop.desc[lang].toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         workshop.location[lang].toLowerCase().includes(searchTerm.toLowerCase());
+      workshop.desc[lang].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      workshop.location[lang].toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || workshop.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -140,7 +128,7 @@ function SearchScreen() {
       // assume date is in format DD.MM.YYYY or DD.MM.YY
       const parseDate = d => {
         const [day, month, year] = d.split('.')
-        return new Date(Number(year.length === 2 ? '20'+year : year), Number(month)-1, Number(day));
+        return new Date(Number(year.length === 2 ? '20' + year : year), Number(month) - 1, Number(day));
       };
       return parseDate(a.date) - parseDate(b.date);
     }
@@ -159,139 +147,175 @@ function SearchScreen() {
 
   return (
     <Container maxWidth="sm" sx={{ bgcolor: "#faf7f2", minHeight: "100vh", pb: 8, px: 2, py: 3 }} dir="rtl">
-      <AppBar position="static" color="inherit" elevation={0} sx={{ mb: 2, borderBottom: '1px solid #eee' }}>
-        <Toolbar>
-          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+      <AppBar position="static" color="inherit" elevation={0} sx={{ mb: 2, borderBottom: '1px solid #eee', bgcolor: '#faf7f2' }}>
+        <Toolbar sx={{ flexDirection: 'column', alignItems: 'stretch', px: 0 }}>
+          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', mb: 1 }}>
             <img src={liuLogo} alt="LIU Logo" style={{ height: 36, marginRight: 8, borderRadius: 8, background: "#fff" }} />
-            <Typography variant="h6" sx={{ color: mainColor, fontWeight: 700 }}>חיפוש</Typography>
           </Box>
+          <TextField
+            fullWidth
+            placeholder={lang === 'he' ? 'חיפוש סדנאות...' : 'Search workshops...'}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ mb: 0, bgcolor: '#fff', borderRadius: 2 }}
+            inputProps={{ style: { textAlign: 'right' } }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: mainColor }} />
+                </InputAdornment>
+              ),
+            }}
+          />
         </Toolbar>
       </AppBar>
 
-      {/* חיפוש */}
-      <TextField
-        fullWidth
-        placeholder={lang === 'he' ? 'חיפוש סדנאות...' : 'Search workshops...'}
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        sx={{ mb: 2 }}
-        inputProps={{ style: { textAlign: 'right' } }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon sx={{ color: mainColor }} />
-            </InputAdornment>
-          ),
-        }}
-      />
-
       {/* תגיות סינון */}
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="subtitle2" sx={{ mb: 1, color: mainColor, fontWeight: 600 }}>
-          {lang === 'he' ? 'סינון לפי קטגוריה:' : 'Filter by category:'}
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          {categories.map(category => (
-            <Chip
-              key={category.id}
-              label={`${category.emoji} ${category.label[lang]}`}
-              onClick={() => setSelectedCategory(category.id)}
-              sx={{
-                bgcolor: selectedCategory === category.id ? mainColor : 'transparent',
-                color: selectedCategory === category.id ? 'white' : mainColor,
-                borderColor: mainColor,
-                border: '1px solid',
-                '&:hover': {
-                  bgcolor: selectedCategory === category.id ? mainColor : '#f0f0f0'
-                }
-              }}
-            />
-          ))}
-        </Box>
+      <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+        <Button onClick={() => setFiltersOpen(o => !o)} size="small" sx={{ minWidth: 0, p: 0.5, color: mainColor, bgcolor: '#f7f4f0', borderRadius: 2 }}>
+          <span style={{ display: 'flex', alignItems: 'center', fontSize: 18, transition: 'transform 0.2s', transform: filtersOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+        </Button>
       </Box>
-
-      {/* שורת מיון בסגנון דינמי */}
-      <Box sx={{ mb: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-        <Box
-          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none', minWidth: 0 }}
-          onClick={e => setSortMenuAnchor(e.currentTarget)}>
-          <Typography variant="subtitle2" sx={{ color: mainColor, fontWeight: 600, fontSize: 16, ml: 1 }}>
-            מיינו לפי:
+      {filtersOpen && (
+        <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5, bgcolor: '#f7f4f0', borderRadius: 3, px: 2, py: 1, boxShadow: 0 }}>
+          <Typography variant="subtitle2" sx={{ color: mainColor, fontWeight: 600, fontSize: 15, minWidth: 90, textAlign: 'right' }}>
+            {lang === 'he' ? 'סינון לפי קטגוריה:' : 'Filter by category:'}
           </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 700, fontSize: 16, color: '#222', ml: 0.5 }}>
-            {({
-              distance: 'מרחק',
-              date: 'תאריך',
-              priceLow: 'מחיר מהזול ליקר',
-              priceHigh: 'מחיר מהיקר לזול'
-            })[sortBy]}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+            {categories.map(category => (
+              <Chip
+                key={category.id}
+                label={`${category.emoji} ${category.label[lang]}`}
+                onClick={() => setSelectedCategory(category.id)}
+                sx={{
+                  bgcolor: selectedCategory === category.id ? mainColor : '#fff',
+                  color: selectedCategory === category.id ? 'white' : mainColor,
+                  borderColor: mainColor,
+                  border: '1px solid',
+                  fontSize: 15,
+                  height: 32,
+                  borderRadius: 2,
+                  boxShadow: 0,
+                  px: 1.5,
+                  '&:hover': {
+                    bgcolor: selectedCategory === category.id ? mainColor : '#f0f0f0'
+                  }
+                }}
+              />
+            ))}
+          </Box>
+          <Typography variant="subtitle2" sx={{ color: mainColor, fontWeight: 600, fontSize: 15, minWidth: 110, textAlign: 'right', ml: 2 }}>
+            סינון לפי גיל התינוק:
           </Typography>
-          <SwapVertIcon sx={{ color: mainColor, fontSize: 22, mt: 0.2 }} />
-        </Box>
-        <Menu
-          anchorEl={sortMenuAnchor}
-          open={Boolean(sortMenuAnchor)}
-          onClose={() => setSortMenuAnchor(null)}
-        >
-          <MenuItem onClick={() => { setSortBy('distance'); setSortMenuAnchor(null); }}>מרחק</MenuItem>
-          <MenuItem onClick={() => { setSortBy('date'); setSortMenuAnchor(null); }}>תאריך</MenuItem>
-          <MenuItem onClick={() => { setSortBy('priceLow'); setSortMenuAnchor(null); }}>מחיר מהזול ליקר</MenuItem>
-          <MenuItem onClick={() => { setSortBy('priceHigh'); setSortMenuAnchor(null); }}>מחיר מהיקר לזול</MenuItem>
-        </Menu>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip title={lang === 'he' ? 'הצג רשימה' : 'Show List'}>
-            <Box
-              component="span"
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 42,
-                height: 42,
-                borderRadius: '50%',
-                bgcolor: '#fff',
-                border: !showMap ? `2px solid ${mainColor}` : '1.5px solid #e0e0e0',
-                color: !showMap ? mainColor : '#bdbdbd',
-                cursor: 'pointer',
-                transition: 'all 0.18s',
-                '&:hover': {
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+            {babyAgeOptions.map(opt => (
+              <Chip
+                key={opt.id}
+                label={opt.label}
+                onClick={() => setBabyAge(opt.id)}
+                sx={{
+                  bgcolor: babyAge === opt.id ? mainColor : '#fff',
+                  color: babyAge === opt.id ? 'white' : mainColor,
                   borderColor: mainColor,
-                  color: mainColor,
-                  bgcolor: '#faf7f2',
-                },
-              }}
-              onClick={() => setShowMap(false)}
-            >
-              <ViewListIcon sx={{ fontSize: 24 }} />
-            </Box>
-          </Tooltip>
-          <Tooltip title={lang === 'he' ? 'הצג מפה' : 'Show Map'}>
-            <Box
-              component="span"
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 42,
-                height: 42,
-                borderRadius: '50%',
-                bgcolor: '#fff',
-                border: showMap ? `2px solid ${mainColor}` : '1.5px solid #e0e0e0',
-                color: showMap ? mainColor : '#bdbdbd',
-                cursor: 'pointer',
-                transition: 'all 0.18s',
-                '&:hover': {
-                  borderColor: mainColor,
-                  color: mainColor,
-                  bgcolor: '#faf7f2',
-                },
-              }}
-              onClick={() => setShowMap(true)}
-            >
-              <MapIcon sx={{ fontSize: 24 }} />
-            </Box>
-          </Tooltip>
+                  border: '1px solid',
+                  fontSize: 15,
+                  height: 32,
+                  borderRadius: 2,
+                  boxShadow: 0,
+                  px: 1.5,
+                  '&:hover': {
+                    bgcolor: babyAge === opt.id ? mainColor : '#f0f0f0'
+                  }
+                }}
+              />
+            ))}
+          </Box>
         </Box>
+      )}
+      {/* שורת מיון */}
+      {filtersOpen && (
+        <Box sx={{ mb: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', width: '100%', gap: 1.5, bgcolor: '#f7f4f0', borderRadius: 3, px: 2, py: 1, boxShadow: 0 }}>
+          <Typography variant="subtitle2" sx={{ color: mainColor, fontWeight: 600, fontSize: 15, minWidth: 70, textAlign: 'right', ml: 0 }}>
+            מיון לפי:
+          </Typography>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none', minWidth: 0 }}
+            onClick={e => setSortMenuAnchor(e.currentTarget)}>
+            <Typography variant="body2" sx={{ fontWeight: 700, fontSize: 15, color: '#222', ml: 0.5 }}>
+              {({
+                distance: 'מרחק',
+                date: 'תאריך',
+                priceLow: 'מחיר מהזול ליקר',
+                priceHigh: 'מחיר מהיקר לזול'
+              })[sortBy]}
+            </Typography>
+            <SwapVertIcon sx={{ color: mainColor, fontSize: 22, mt: 0.2 }} />
+          </Box>
+          <Menu
+            anchorEl={sortMenuAnchor}
+            open={Boolean(sortMenuAnchor)}
+            onClose={() => setSortMenuAnchor(null)}
+          >
+            <MenuItem onClick={() => { setSortBy('distance'); setSortMenuAnchor(null); }}>מרחק</MenuItem>
+            <MenuItem onClick={() => { setSortBy('date'); setSortMenuAnchor(null); }}>תאריך</MenuItem>
+            <MenuItem onClick={() => { setSortBy('priceLow'); setSortMenuAnchor(null); }}>מחיר מהזול ליקר</MenuItem>
+            <MenuItem onClick={() => { setSortBy('priceHigh'); setSortMenuAnchor(null); }}>מחיר מהיקר לזול</MenuItem>
+          </Menu>
+        </Box>
+      )}
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Tooltip title={lang === 'he' ? 'הצג רשימה' : 'Show List'}>
+          <Box
+            component="span"
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 42,
+              height: 42,
+              borderRadius: '50%',
+              bgcolor: '#fff',
+              border: !showMap ? `2px solid ${mainColor}` : '1.5px solid #e0e0e0',
+              color: !showMap ? mainColor : '#bdbdbd',
+              cursor: 'pointer',
+              transition: 'all 0.18s',
+              '&:hover': {
+                borderColor: mainColor,
+                color: mainColor,
+                bgcolor: '#faf7f2',
+              },
+            }}
+            onClick={() => setShowMap(false)}
+          >
+            <ViewListIcon sx={{ fontSize: 24 }} />
+          </Box>
+        </Tooltip>
+        <Tooltip title={lang === 'he' ? 'הצג מפה' : 'Show Map'}>
+          <Box
+            component="span"
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 42,
+              height: 42,
+              borderRadius: '50%',
+              bgcolor: '#fff',
+              border: showMap ? `2px solid ${mainColor}` : '1.5px solid #e0e0e0',
+              color: showMap ? mainColor : '#bdbdbd',
+              cursor: 'pointer',
+              transition: 'all 0.18s',
+              '&:hover': {
+                borderColor: mainColor,
+                color: mainColor,
+                bgcolor: '#faf7f2',
+              },
+            }}
+            onClick={() => setShowMap(true)}
+          >
+            <MapIcon sx={{ fontSize: 24 }} />
+          </Box>
+        </Tooltip>
       </Box>
 
       {showMap ? (
