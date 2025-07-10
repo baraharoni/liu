@@ -24,21 +24,21 @@ export default function UserProfileHeader({ onEdit }) {
           <Box sx={{ position: 'relative' }}>
             <Avatar
               src={user.avatar}
-              sx={{ 
-                width: 80, 
-                height: 80, 
+              sx={{
+                width: 80,
+                height: 80,
                 border: '3px solid #f0f0f0',
                 boxShadow: 2
               }}
             />
             <IconButton
               size="small"
-              sx={{ 
-                position: 'absolute', 
-                bottom: 0, 
-                right: 0, 
-                p: 0.5, 
-                bgcolor: 'white', 
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                p: 0.5,
+                bgcolor: 'white',
                 boxShadow: 2,
                 border: '2px solid #f0f0f0',
                 '&:hover': { bgcolor: '#f8f8f8' }
@@ -48,7 +48,7 @@ export default function UserProfileHeader({ onEdit }) {
               <EditIcon fontSize="small" sx={{ color: '#666' }} />
             </IconButton>
           </Box>
-          
+
           <Box sx={{ textAlign: 'right', flexGrow: 1, pr: 2 }}>
             <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.2, mb: 0.5 }}>
               שלום {user.firstName}!
@@ -61,22 +61,22 @@ export default function UserProfileHeader({ onEdit }) {
 
         {/* User details chips */}
         <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-          <Chip 
-            icon={<PersonIcon />} 
-            label={`גיל: ${user.age} | אמא ל-${user.children}`} 
-            variant="outlined" 
-            sx={{ 
-              borderColor: '#b39ddb', 
+          <Chip
+            icon={<PersonIcon />}
+            label={`גיל: ${user.age} | אמא ל-${user.children}`}
+            variant="outlined"
+            sx={{
+              borderColor: '#b39ddb',
               color: '#666',
               fontSize: '0.875rem'
             }}
           />
-          <Chip 
-            icon={<LocationOnIcon />} 
-            label={`אזור: ${user.location}`} 
-            variant="outlined" 
-            sx={{ 
-              borderColor: '#b39ddb', 
+          <Chip
+            icon={<LocationOnIcon />}
+            label={`אזור: ${user.location}`}
+            variant="outlined"
+            sx={{
+              borderColor: '#b39ddb',
               color: '#666',
               fontSize: '0.875rem'
             }}

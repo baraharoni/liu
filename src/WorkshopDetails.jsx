@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Paper, Stack, Button, Avatar, IconButton, TextField, Divider, CardMedia,
-  Chip, Grid, Container, Fab
+  Box, Typography, Button, Paper, Divider, Stack, Container, AppBar, Toolbar,
+  Card, CardContent, CardMedia, List, ListItem, ListItemAvatar, ListItemText, Avatar,
+  IconButton, TextField, Chip, Fab, Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SendIcon from '@mui/icons-material/Send';
-import AddIcon from '@mui/icons-material/Add';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PersonIcon from '@mui/icons-material/Person';
-import { MamaCoinsIcon } from './App';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import AddIcon from '@mui/icons-material/Add';
+import SendIcon from '@mui/icons-material/Send';
+import PersonIcon from '@mui/icons-material/Person';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { MamaCoinsIcon } from './App';
 import liaddorImg from './assets/liaddor.jpg';
-import { useNavigate, useParams } from 'react-router-dom';
 import {
   initialMyWorkshops,
   attendedWorkshops,
@@ -23,70 +24,76 @@ import {
   availableWorkshops
 } from './workshopData';
 
-const mainColor = '#b39ddb';
-const accentColor = '#f5f3fa';
+const mainColor = "#b39ddb";
+const accentColor = "#d4c1ec";
 
-const lang = 'he'; // אפשר להחליף לדינמי בהמשך
-const dir = lang === 'he' ? 'rtl' : 'ltr';
-
-const initialComments = [
-  {
-    id: 1,
-    user: { name: 'נועה כהן', avatar: 'https://randomuser.me/api/portraits/women/65.jpg' },
-    text: 'היה מדהים! למדתי המון והאווירה הייתה נעימה.',
-    date: '12.7.2025'
+// טקסטים לשתי שפות
+const texts = {
+  he: {
+    conflictTitle: "חפיפת זמנים",
+    conflictMessage: "יש לך סדנה אחרת באותו זמן. מה את מעדיפה?",
+    currentWorkshop: "הסדנה הנוכחית",
+    existingWorkshop: "הסדנה הקיימת",
+    cancel: "ביטול",
+    confirm: "אישור"
   },
-  {
-    id: 2,
-    user: { name: 'דנה לוי', avatar: 'https://randomuser.me/api/portraits/women/66.jpg' },
-    text: 'הסדנה הייתה מקצועית מאוד, המנחה הסבירה הכל בצורה ברורה.',
-    date: '12.7.2025'
-  },
-  {
-    id: 3,
-    user: { name: 'שירי בר', avatar: 'https://randomuser.me/api/portraits/women/68.jpg' },
-    text: '',
-    date: '11.7.2025'
+  en: {
+    conflictTitle: "Time Conflict",
+    conflictMessage: "You have another workshop at the same time. What do you prefer?",
+    currentWorkshop: "Current Workshop",
+    existingWorkshop: "Existing Workshop",
+    cancel: "Cancel",
+    confirm: "Confirm"
   }
-];
+};
 
-export default function WorkshopDetails() {
+export default function WorkshopDetails({ myUpcomingActivities, setMyUpcomingActivities }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [workshop, setWorkshop] = useState(null);
+  const [lang] = useState('he');
   const [loading, setLoading] = useState(true);
-  const [comments, setComments] = useState(initialComments);
+  const [workshop, setWorkshop] = useState(null);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [isAttended, setIsAttended] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [isAttended, setIsAttended] = useState(false); // New state for attendance status
+  const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
+  const [conflictingWorkshop, setConflictingWorkshop] = useState(null);
+
+  // כיוון דף
+  const dir = lang === 'he' ? 'rtl' : 'ltr';
 
   useEffect(() => {
-    const allWorkshops = [
-      ...initialMyWorkshops,
-      ...attendedWorkshops,
-      ...futureWorkshops,
-      ...myUpcomingActivities,
-      ...availableWorkshops
-    ];
-    const foundWorkshop = allWorkshops.find(ws => String(ws.id) === String(id));
-    setWorkshop(foundWorkshop);
-    setLoading(false);
+    // Simulate loading
+    setTimeout(() => {
+      const allWorkshops = [
+        ...initialMyWorkshops,
+        ...attendedWorkshops,
+        ...futureWorkshops,
+        ...myUpcomingActivities,
+        ...availableWorkshops
+      ];
 
-    // Check if the current user attended this workshop
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user && foundWorkshop) {
+      const foundWorkshop = allWorkshops.find(ws => String(ws.id) === String(id));
+      setWorkshop(foundWorkshop);
+
+      // Check if user is registered
+      const user = { attendedWorkshops: attendedWorkshops };
       setIsAttended(user.attendedWorkshops.some(ws => String(ws.id) === String(id)));
-    }
+
+      setLoading(false);
+    }, 500);
   }, [id]);
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
+
     setSubmitting(true);
     setTimeout(() => {
-      setComments([
-        ...comments,
+      setComments(prev => [
+        ...prev,
         {
           id: Date.now(),
           user: { name: 'ליעד דור', avatar: liaddorImg },
@@ -99,11 +106,62 @@ export default function WorkshopDetails() {
     }, 600);
   };
 
+  // פונקציה לבדיקת חפיפת זמנים
+  const checkTimeConflict = (newWorkshop) => {
+    const newDate = newWorkshop.date;
+    const newTime = newWorkshop.time;
+
+    // בדיקה מול הסדנאות העתידיותשתמשת רשומה אליהן
+    const conflict = myUpcomingActivities.find(existing => {
+      return existing.date === newDate && existing.time === newTime;
+    });
+
+    return conflict;
+  };
+
+  // פונקציה לביטול הרשמה לסדנה
+  const cancelWorkshopRegistration = (workshopId) => {
+    setMyUpcomingActivities(prev => prev.filter(ws => ws.id !== workshopId));
+  };
+
   const handleRegister = () => {
+    // בדיקת חפיפת זמנים
+    const conflict = checkTimeConflict(workshop);
+
+    if (conflict) {
+      setConflictingWorkshop(conflict);
+      setConflictDialogOpen(true);
+    } else {
+      // אין חפיפה - הרשמה רגילה
+      registerToWorkshop();
+    }
+  };
+
+  const registerToWorkshop = () => {
     setIsRegistered(true);
+    // הוספת הסדנה לרשימת הסדנאות העתידיות
+    const workshopToAdd = {
+      ...workshop,
+      status: "נרשמתי"
+    };
+    setMyUpcomingActivities(prev => [workshopToAdd, ...prev]);
+
     setTimeout(() => {
       alert('נרשמת בהצלחה לסדנה!');
     }, 500);
+  };
+
+  const handleConflictChoice = (chooseCurrent) => {
+    if (chooseCurrent) {
+      // המשתמשת בוחרת בסדנה הנוכחית - לבטל את הקודמת
+      if (conflictingWorkshop) {
+        cancelWorkshopRegistration(conflictingWorkshop.id);
+      }
+      registerToWorkshop();
+    }
+    // אם לא בוחרת בסדנה הנוכחית, לא עושים כלום
+    setConflictDialogOpen(false);
+    setConflictingWorkshop(null);
   };
 
   const nextImage = () => {
@@ -402,6 +460,82 @@ export default function WorkshopDetails() {
         <AddIcon sx={{ mr: 1 }} />
         {isRegistered ? 'נרשמת!' : 'הרשמה לסדנה'}
       </Fab>
+
+      {/* Conflict Dialog */}
+      <Dialog
+        open={conflictDialogOpen}
+        onClose={() => setConflictDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ textAlign: 'right', fontWeight: 700, color: mainColor }}>
+          {texts[lang].conflictTitle}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ textAlign: 'right', mb: 3 }}>
+            {texts[lang].conflictMessage}
+          </Typography>
+
+          {conflictingWorkshop && (
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ color: mainColor, mb: 2, textAlign: 'right' }}>
+                {texts[lang].existingWorkshop}:
+              </Typography>
+              <Paper sx={{ p: 2, bgcolor: '#f5f5f5' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, textAlign: 'right', mb: 1 }}>
+                  {conflictingWorkshop.title.he}
+                </Typography>
+                <Typography variant="body2" sx={{ textAlign: 'right', mb: 1 }}>
+                  {conflictingWorkshop.date} | {conflictingWorkshop.time}
+                </Typography>
+                <Typography variant="body2" sx={{ textAlign: 'right' }}>
+                  {conflictingWorkshop.location.he}
+                </Typography>
+              </Paper>
+            </Box>
+          )}
+
+          <Typography variant="h6" sx={{ color: mainColor, mb: 2, textAlign: 'right' }}>
+            {texts[lang].currentWorkshop}:
+          </Typography>
+          <Paper sx={{ p: 2, bgcolor: '#f0f8ff' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, textAlign: 'right', mb: 1 }}>
+              {workshop.title.he}
+            </Typography>
+            <Typography variant="body2" sx={{ textAlign: 'right', mb: 1 }}>
+              {workshop.date} | {workshop.time}
+            </Typography>
+            <Typography variant="body2" sx={{ textAlign: 'right' }}>
+              {workshop.location.he}
+            </Typography>
+          </Paper>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'space-between', p: 3 }}>
+          <Button
+            onClick={() => setConflictDialogOpen(false)}
+            variant="outlined"
+            sx={{ color: mainColor, borderColor: mainColor }}
+          >
+            {texts[lang].cancel}
+          </Button>
+          <Stack direction="row" spacing={2}>
+            <Button
+              onClick={() => handleConflictChoice(false)}
+              variant="outlined"
+              sx={{ color: mainColor, borderColor: mainColor }}
+            >
+              {texts[lang].existingWorkshop}
+            </Button>
+            <Button
+              onClick={() => handleConflictChoice(true)}
+              variant="contained"
+              sx={{ bgcolor: mainColor }}
+            >
+              {texts[lang].currentWorkshop}
+            </Button>
+          </Stack>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 } 

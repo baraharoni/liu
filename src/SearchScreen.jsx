@@ -15,7 +15,7 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import Tooltip from '@mui/material/Tooltip';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
-import liuLogo from './assets/liu-logo.png';
+import liuLogo from './assets/logonew.jpeg';
 import liaddorImg from './assets/liaddor.jpg';
 // ייבוא מערך הדמו
 import { availableWorkshops } from './workshopData';

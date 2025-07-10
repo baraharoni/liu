@@ -7,7 +7,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuIcon from '@mui/icons-material/Menu';
-import liuLogo from './assets/liu-logo.png';
+import liuLogo from './assets/logonew.jpeg';
 import liaddorImg from './assets/liaddor.jpg';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Link, useParams } from 'react-router-dom';
 import CreateWorkshop from './CreateWorkshop';
@@ -15,9 +15,15 @@ import HelpWizardDialog from './HelpWizardDialog';
 import CalendarScreen from './CalendarScreen';
 import SearchScreen from './SearchScreen';
 import ProfileScreen from './ProfileScreen';
+import MyLiuScreen from './MyLiuScreen';
+import AboutScreen from './AboutScreen';
+import TermsScreen from './TermsScreen';
+import HelpScreen from './HelpScreen';
+import SettingsScreen from './SettingsScreen';
 import WorkshopDetails from './WorkshopDetails';
+import OnboardingScreen from './OnboardingScreen';
 // ייבוא מערכי הדמו
-import { initialMyWorkshops, attendedWorkshops, futureWorkshops, availableWorkshops } from './workshopData';
+import { initialMyWorkshops, attendedWorkshops, futureWorkshops, availableWorkshops, myUpcomingActivities as initialUpcoming } from './workshopData';
 import CloseIcon from '@mui/icons-material/Close';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -794,32 +800,6 @@ function BottomNavigation({ currentPath }) {
       position: "fixed", bottom: 0, left: 0, right: 0, bgcolor: "#fff", borderTop: "1px solid #eee",
       display: "flex", justifyContent: "space-around", py: 1, zIndex: 100
     }}>
-      <Box
-        sx={{
-          flexDirection: "column",
-          minWidth: "auto",
-          color: '#999',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flex: 1
-        }}
-      >
-        <img
-          src={liaddorImg}
-          alt="Profile"
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: '50%',
-            objectFit: 'cover',
-            marginBottom: 2,
-            border: '1.5px solid #ccc',
-            background: '#fff'
-          }}
-        />
-        <div style={{ fontSize: "0.7rem" }}>הפרופיל שלי</div>
-      </Box>
       <Button
         sx={{
           color: currentPath === '/profile' ? mainColor : '#666',
@@ -831,13 +811,38 @@ function BottomNavigation({ currentPath }) {
         onClick={() => navigate('/profile')}
       >
         <img
+          src={liaddorImg}
+          alt="Profile"
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: '50%',
+            objectFit: 'cover',
+            marginBottom: 2,
+            border: currentPath === '/profile' ? '2px solid #b39ddb' : '1.5px solid #ccc',
+            background: '#fff'
+          }}
+        />
+        <div style={{ fontSize: "0.7rem" }}>הפרופיל שלי</div>
+      </Button>
+      <Button
+        sx={{
+          color: currentPath === '/my-liu' ? mainColor : '#666',
+          flexDirection: "column",
+          minWidth: "auto",
+          '&:hover': { bgcolor: 'transparent' },
+          flex: 1
+        }}
+        onClick={() => navigate('/my-liu')}
+      >
+        <img
           src={liuLogo}
           alt="LIU Logo"
           style={{
             width: 24,
             height: 24,
             borderRadius: '50%',
-            border: currentPath === '/profile' ? '2px solid #b39ddb' : 'none',
+            border: currentPath === '/my-liu' ? '2px solid #b39ddb' : 'none',
             background: '#fff',
             objectFit: 'cover',
             marginBottom: 2
@@ -898,15 +903,31 @@ function ScrollToTop() {
 
 function AppContent({ setAgreementOpen }) {
   const [myWorkshops, setMyWorkshops] = useState([...initialMyWorkshops]);
+  const [myUpcomingActivities, setMyUpcomingActivities] = useState([...initialUpcoming]);
   const [prefill, setPrefill] = useState(null);
   const location = useLocation();
+
+  // בדיקה אם האונבורדינג הוצג כבר
+  const onboardingCompleted = localStorage.getItem('onboardingCompleted') === 'true';
 
   return (
     <>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<HomeScreen myWorkshops={myWorkshops} setMyWorkshops={setMyWorkshops} setPrefill={setPrefill} setAgreementOpen={setAgreementOpen} />} />
-        <Route path="/profile" element={<ProfileScreen myWorkshops={myWorkshops} setMyWorkshops={setMyWorkshops} setPrefill={setPrefill} />} />
+        <Route path="/onboarding" element={<OnboardingScreen />} />
+        <Route path="/" element={
+          onboardingCompleted ? (
+            <HomeScreen myWorkshops={myWorkshops} setMyWorkshops={setMyWorkshops} setPrefill={setPrefill} setAgreementOpen={setAgreementOpen} />
+          ) : (
+            <OnboardingScreen />
+          )
+        } />
+        <Route path="/profile" element={<ProfileScreen />} />
+        <Route path="/my-liu" element={<MyLiuScreen myWorkshops={myWorkshops} setMyWorkshops={setMyWorkshops} setPrefill={setPrefill} myUpcomingActivities={myUpcomingActivities} setMyUpcomingActivities={setMyUpcomingActivities} />} />
+        <Route path="/about" element={<AboutScreen />} />
+        <Route path="/terms" element={<TermsScreen />} />
+        <Route path="/help" element={<HelpScreen />} />
+        <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/calendar" element={<CalendarScreen />} />
         <Route path="/search" element={<SearchScreen />} />
         <Route path="/create-workshop" element={<CreateWorkshop myWorkshops={myWorkshops} setMyWorkshops={setMyWorkshops} prefill={prefill} />} />
@@ -914,10 +935,10 @@ function AppContent({ setAgreementOpen }) {
         <Route path="/workshop/demo2" element={<ExampleWorkshopPage />} />
         <Route path="/workshop/demo3" element={<ExampleWorkshopPage />} />
         <Route path="/workshop/demo4" element={<ExampleWorkshopPage />} />
-        <Route path="/workshop/:id" element={<WorkshopDetails />} />
+        <Route path="/workshop/:id" element={<WorkshopDetails myUpcomingActivities={myUpcomingActivities} setMyUpcomingActivities={setMyUpcomingActivities} />} />
         <Route path="/mama-coins" element={<MamaCoinsScreen />} />
       </Routes>
-      <BottomNavigation currentPath={location.pathname} />
+      {onboardingCompleted && location.pathname !== '/onboarding' && <BottomNavigation currentPath={location.pathname} />}
     </>
   );
 }

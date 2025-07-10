@@ -6,7 +6,7 @@ import {
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import liuLogo from './assets/liu-logo.png';
+import liuLogo from './assets/logonew.jpeg';
 import liaddorImg from './assets/liaddor.jpg';
 import { Link } from 'react-router-dom';
 // ייבוא מערך הדמו
