@@ -185,7 +185,19 @@ export const availableWorkshops = [
     coordinates: { lat: 32.0853, lng: 34.7818 },
     host: { he: "שרה כהן", en: "Sarah Cohen" },
     participants: 8,
-    maxParticipants: 12
+    maxParticipants: 12,
+    sessions: [
+      {
+        id: 1,
+        date: "10.7.2025",
+        time: "10:00",
+        participants: [
+          { id: 1, name: { he: "נועה כהן", en: "Noa Cohen" }, avatar: "https://randomuser.me/api/portraits/women/65.jpg" },
+          { id: 2, name: { he: "דנה לוי", en: "Dana Levi" }, avatar: "https://randomuser.me/api/portraits/women/66.jpg" },
+          { id: 3, name: { he: "רוני ישראלי", en: "Roni Israeli" }, avatar: "https://randomuser.me/api/portraits/women/67.jpg" }
+        ]
+      }
+    ]
   },
   {
     id: 21,
@@ -200,7 +212,28 @@ export const availableWorkshops = [
     coordinates: { lat: 32.0684, lng: 34.8248 },
     host: { he: "דנה לוי", en: "Dana Levi" },
     participants: 10,
-    maxParticipants: 15
+    maxParticipants: 15,
+    sessions: [
+      {
+        id: 1,
+        date: "20.7.2025",
+        time: "17:00",
+        participants: [
+          { id: 4, name: { he: "שירי בר", en: "Shiri Bar" }, avatar: "https://randomuser.me/api/portraits/women/68.jpg" },
+          { id: 5, name: { he: "מאיה לוי", en: "Maya Levi" }, avatar: "https://randomuser.me/api/portraits/women/69.jpg" },
+          { id: 6, name: { he: "אורית בן דוד", en: "Orit Ben David" }, avatar: "https://randomuser.me/api/portraits/women/70.jpg" }
+        ]
+      },
+      {
+        id: 2,
+        date: "27.7.2025",
+        time: "17:00",
+        participants: [
+          { id: 7, name: { he: "ליאת כהן", en: "Liat Cohen" }, avatar: "https://randomuser.me/api/portraits/women/71.jpg" },
+          { id: 8, name: { he: "סיון רוזן", en: "Sivan Rozen" }, avatar: "https://randomuser.me/api/portraits/women/72.jpg" }
+        ]
+      }
+    ]
   },
   {
     id: 22,
@@ -215,7 +248,18 @@ export const availableWorkshops = [
     coordinates: { lat: 32.0961, lng: 34.7748 },
     host: { he: "רוני ישראלי", en: "Roni Israeli" },
     participants: 8,
-    maxParticipants: 10
+    maxParticipants: 10,
+    sessions: [
+      {
+        id: 1,
+        date: "25.7.2025",
+        time: "09:00",
+        participants: [
+          { id: 9, name: { he: "גלית שחר", en: "Galit Shahar" }, avatar: "https://randomuser.me/api/portraits/women/73.jpg" },
+          { id: 10, name: { he: "איילת לוי", en: "Ayelet Levi" }, avatar: "https://randomuser.me/api/portraits/women/74.jpg" }
+        ]
+      }
+    ]
   },
   {
     id: 23,
@@ -230,7 +274,19 @@ export const availableWorkshops = [
     coordinates: { lat: 32.0114, lng: 34.7748 },
     host: { he: "שירי בר", en: "Shiri Bar" },
     participants: 12,
-    maxParticipants: 15
+    maxParticipants: 15,
+    sessions: [
+      {
+        id: 1,
+        date: "5.8.2025",
+        time: "18:00",
+        participants: [
+          { id: 11, name: { he: "דנה לוי", en: "Dana Levi" }, avatar: "https://randomuser.me/api/portraits/women/66.jpg" },
+          { id: 12, name: { he: "נועה כהן", en: "Noa Cohen" }, avatar: "https://randomuser.me/api/portraits/women/65.jpg" },
+          { id: 13, name: { he: "סיון רוזן", en: "Sivan Rozen" }, avatar: "https://randomuser.me/api/portraits/women/72.jpg" }
+        ]
+      }
+    ]
   },
   {
     id: 24,
@@ -245,7 +301,26 @@ export const availableWorkshops = [
     coordinates: { lat: 32.0912, lng: 34.8866 },
     host: { he: "נועה כהן", en: "Noa Cohen" },
     participants: 6,
-    maxParticipants: 10
+    maxParticipants: 10,
+    sessions: [
+      {
+        id: 1,
+        date: "10.8.2025",
+        time: "11:00",
+        participants: [
+          { id: 14, name: { he: "מאיה לוי", en: "Maya Levi" }, avatar: "https://randomuser.me/api/portraits/women/69.jpg" },
+          { id: 15, name: { he: "גלית שחר", en: "Galit Shahar" }, avatar: "https://randomuser.me/api/portraits/women/73.jpg" }
+        ]
+      },
+      {
+        id: 2,
+        date: "17.8.2025",
+        time: "11:00",
+        participants: [
+          { id: 16, name: { he: "איילת לוי", en: "Ayelet Levi" }, avatar: "https://randomuser.me/api/portraits/women/74.jpg" }
+        ]
+      }
+    ]
   }
 ];
 
@@ -409,3 +484,9 @@ availableWorkshops.push(
     maxParticipants: 30
   }
 ); 
+
+// דמו מנחות
+export const hosts = [
+  { id: 1, name: 'ליעד דור', email: 'liad@liu.com', avatar: '/src/assets/liaddor.jpg' },
+  { id: 2, name: 'נועה כהן', email: 'noa@liu.com', avatar: '' },
+]; 

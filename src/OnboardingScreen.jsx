@@ -144,7 +144,7 @@ const interestOptions = [
 ];
 
 // מסך התחברות חברתית
-function SocialAuthScreen({ onEmailSignUp, onSocialSuccess }) {
+function SocialAuthScreen({ onEmailSignUp, onSocialSuccess, onSkip }) {
     return (
         <Container maxWidth="sm" sx={{ bgcolor: "#faf7f2", minHeight: "100vh", py: 4 }}>
             <Box sx={{ textAlign: 'center', mb: 3 }}>
@@ -164,6 +164,9 @@ function SocialAuthScreen({ onEmailSignUp, onSocialSuccess }) {
             <Typography sx={{ textAlign: 'center', mb: 2, color: '#888' }}>או</Typography>
             <Button variant="contained" color="primary" fullWidth onClick={onEmailSignUp}>
                 הרשמה עם מייל וסיסמה
+            </Button>
+            <Button variant="outlined" color="primary" fullWidth onClick={onSkip} sx={{ mt: 2 }}>
+                דלגי
             </Button>
         </Container>
     );
@@ -193,8 +196,10 @@ export default function OnboardingScreen() {
     const [showRegistration, setShowRegistration] = useState(false);
     const [registrationStep, setRegistrationStep] = useState(0);
     const navigate = useNavigate();
-    const [showSocialAuth, setShowSocialAuth] = useState(true);
-    const [showSplash, setShowSplash] = useState(true);
+    // 1. Set showSocialAuth to false by default
+    const [showSocialAuth, setShowSocialAuth] = useState(false);
+    // 1. הסר את SplashScreen ואת כל השימושים ב-showSplash
+    // 2. ודא שה-onboarding מתחיל ישר מהמסך הראשון (onboardingSteps)
 
     // נתוני הרשמה
     const [formData, setFormData] = useState({
@@ -215,11 +220,13 @@ export default function OnboardingScreen() {
 
     const dir = lang === 'he' ? 'rtl' : 'ltr';
 
+    // עדכן את handleNext כך שאחרי המסך האחרון של האון-בורדינג תוצג SocialAuthScreen
     const handleNext = () => {
         if (currentStep < onboardingSteps.length - 1) {
             setCurrentStep(currentStep + 1);
         } else {
-            setShowRegistration(true);
+            setShowSocialAuth(true);
+            // 2. ודא שה-onboarding מתחיל ישר מהמסך הראשון (onboardingSteps)
         }
     };
 
@@ -229,10 +236,10 @@ export default function OnboardingScreen() {
         }
     };
 
+    // 2. Update handleSkip to only show SocialAuthScreen
     const handleSkip = () => {
-        // שמירה ב-localStorage שהאונבורדינג הוצג
-        localStorage.setItem('onboardingCompleted', 'true');
-        navigate('/');
+        setShowSocialAuth(true);
+        // 2. ודא שה-onboarding מתחיל ישר מהמסך הראשון (onboardingSteps)
     };
 
     const handleRegistrationNext = () => {
@@ -270,13 +277,15 @@ export default function OnboardingScreen() {
         }));
     };
 
-    if (showSplash) {
-        return <SplashScreen onStart={() => setShowSplash(false)} />;
-    }
-    if (showSocialAuth) {
-        return <SocialAuthScreen onEmailSignUp={() => setShowSocialAuth(false)} onSocialSuccess={() => setShowSocialAuth(false)} />;
-    }
+    // 1. Center onboarding images and button, and ensure skip is always visible
+    // 2. After onboarding, show SocialAuthScreen with Facebook/Google buttons
+    // 3. If user skips, set guestMode in localStorage and navigate home
+    // 4. Add guestMode logic to registration and onboarding
 
+    // --- עריכה עיקרית: ---
+    // 1. Center onboarding button even if no back button
+    // במקום תנאי showSplash, פשוט המשך ל-onboarding
+    const step = onboardingSteps[currentStep];
     if (showRegistration) {
         return (
             <Container maxWidth="sm" sx={{ bgcolor: "#faf7f2", minHeight: "100vh", py: 1 }} dir={dir}>
@@ -286,15 +295,11 @@ export default function OnboardingScreen() {
                         {texts[lang].registration}
                     </Typography>
                 </Box>
-
-                {/* אסיר את כפתורי ההתחברות החברתית מהטופס הזה */}
-
                 <Stepper activeStep={registrationStep} sx={{ mb: 2 }} size="small">
                     <Step><StepLabel>{texts[lang].personalInfo}</StepLabel></Step>
                     <Step><StepLabel>{texts[lang].interests}</StepLabel></Step>
                     <Step><StepLabel>{texts[lang].experience}</StepLabel></Step>
                 </Stepper>
-
                 <Paper sx={{ p: 2, borderRadius: 2 }}>
                     {registrationStep === 0 && (
                         <Box>
@@ -429,7 +434,6 @@ export default function OnboardingScreen() {
                             />
                         </Box>
                     )}
-
                     {registrationStep === 1 && (
                         <Box>
                             <Typography variant="h6" sx={{ color: mainColor, mb: 3, textAlign: 'right' }}>
@@ -438,7 +442,6 @@ export default function OnboardingScreen() {
                             <Typography variant="body2" sx={{ mb: 3, textAlign: 'right', color: '#666' }}>
                                 בחרי את תחומי העניין שלך (אפשר לבחור כמה)
                             </Typography>
-
                             <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1, mb: 3 }}>
                                 {interestOptions.map((interest) => (
                                     <Chip
@@ -452,13 +455,11 @@ export default function OnboardingScreen() {
                             </Stack>
                         </Box>
                     )}
-
                     {registrationStep === 2 && (
                         <Box>
                             <Typography variant="h6" sx={{ color: mainColor, mb: 3, textAlign: 'right' }}>
                                 {texts[lang].experience}
                             </Typography>
-
                             <FormControl component="fieldset" sx={{ width: '100%' }}>
                                 <RadioGroup
                                     value={formData.experience}
@@ -486,7 +487,6 @@ export default function OnboardingScreen() {
                             </FormControl>
                         </Box>
                     )}
-
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                         <Button
                             onClick={handleRegistrationBack}
@@ -514,8 +514,20 @@ export default function OnboardingScreen() {
             </Container>
         );
     }
-
-    const step = onboardingSteps[currentStep];
+    if (showSocialAuth) {
+        return <SocialAuthScreen 
+            onEmailSignUp={() => setShowSocialAuth(false)} 
+            onSocialSuccess={() => {
+                setShowSocialAuth(false);
+                setShowRegistration(true);
+            }} 
+            onSkip={() => {
+                localStorage.setItem('onboardingCompleted', 'true');
+                localStorage.setItem('guestMode', 'true');
+                navigate('/');
+            }} 
+        />;
+    }
     return (
         <Container maxWidth="sm" disableGutters sx={{ minHeight: '100vh', bgcolor: '#faf7f2', p: 0 }}>
             <Box sx={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
@@ -528,14 +540,20 @@ export default function OnboardingScreen() {
                             <Box key={idx} sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: idx === currentStep ? mainColor : '#fff', opacity: idx === currentStep ? 1 : 0.5, border: '1.5px solid #fff' }} />
                         ))}
                     </Box>
-                    <Typography variant="h4" sx={{ color: '#fff', fontWeight: 700, mb: 1, textShadow: '0 2px 8px #0006', textAlign: 'center' }}>
-                        {texts[lang][step.title]}
-                    </Typography>
-                    <Typography variant="subtitle1" sx={{ color: '#fff', mb: 4, fontSize: '1.1rem', textAlign: 'center', textShadow: '0 1px 6px #0007' }}>
-                        {texts[lang][step.subtitle]}
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 2, width: '100%', justifyContent: 'center', mb: 2 }}>
-                        <Button onClick={handleBack} variant="outlined" sx={{ color: '#fff', borderColor: '#fff', minWidth: 80, fontWeight: 500 }} disabled={currentStep === 0}>חזור</Button>
+                    {/* העלה את הטקסטים מעט למעלה */}
+                    <Box sx={{ mb: 2, mt: { xs: 2, sm: 4 } }}>
+                        <Typography variant="h4" sx={{ color: '#fff', fontWeight: 700, mb: 1, textShadow: '0 2px 8px #0006', textAlign: 'center' }}>
+                            {texts[lang][step.title]}
+                        </Typography>
+                        <Typography variant="subtitle1" sx={{ color: '#fff', mb: 2, fontSize: '1.1rem', textAlign: 'center', textShadow: '0 1px 6px #0007' }}>
+                            {texts[lang][step.subtitle]}
+                        </Typography>
+                    </Box>
+                    {/* כפתור הבא ממורכז לבד במסך הראשון */}
+                    <Box sx={{ display: 'flex', gap: 2, width: '100%', justifyContent: currentStep === 0 ? 'center' : 'center', mb: 2 }}>
+                        {currentStep !== 0 && (
+                            <Button onClick={handleBack} variant="outlined" sx={{ color: '#fff', borderColor: '#fff', minWidth: 80, fontWeight: 500 }}>חזור</Button>
+                        )}
                         <Button onClick={handleNext} variant="contained" sx={{ bgcolor: mainColor, minWidth: 80, fontWeight: 500 }}>{currentStep === onboardingSteps.length - 1 ? 'המשיכי' : 'הבא'}</Button>
                     </Box>
                     <Button onClick={handleSkip} variant="text" sx={{ color: '#fff', opacity: 0.8, fontSize: '1rem' }}>דלגי</Button>

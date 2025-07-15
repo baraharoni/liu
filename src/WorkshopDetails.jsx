@@ -247,59 +247,19 @@ export default function WorkshopDetails({ myUpcomingActivities, setMyUpcomingAct
           <>
             <IconButton
               onClick={prevImage}
-              sx={{
-                position: 'absolute',
-                [dir === 'rtl' ? 'right' : 'left']: 16,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                bgcolor: 'rgba(255,255,255,0.9)',
-                '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
-              }}
+              sx={{ position: 'absolute', top: '50%', right: 16, bgcolor: '#fff', transform: 'translateY(-50%)', zIndex: 10 }}
             >
-              {dir === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+              <ChevronRightIcon />
             </IconButton>
             <IconButton
               onClick={nextImage}
-              sx={{
-                position: 'absolute',
-                [dir === 'rtl' ? 'left' : 'right']: 16,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                bgcolor: 'rgba(255,255,255,0.9)',
-                '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
-              }}
+              sx={{ position: 'absolute', top: '50%', left: 16, bgcolor: '#fff', transform: 'translateY(-50%)', zIndex: 10 }}
             >
-              {dir === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+              <ChevronLeftIcon />
             </IconButton>
           </>
         )}
-        {/* Image indicators */}
-        {images.length > 1 && (
-          <Box sx={{
-            position: 'absolute',
-            bottom: 16,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            gap: 1
-          }}>
-            {images.map((_, index) => (
-              <Box
-                key={index}
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  bgcolor: index === currentImageIndex ? 'white' : 'rgba(255,255,255,0.5)',
-                  cursor: 'pointer'
-                }}
-                onClick={() => setCurrentImageIndex(index)}
-              />
-            ))}
-          </Box>
-        )}
       </Box>
-
       <Container maxWidth="md" sx={{ mt: -4, position: 'relative', zIndex: 1 }}>
         {/* Main content card */}
         <Paper sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: 3 }}>
@@ -332,135 +292,72 @@ export default function WorkshopDetails({ myUpcomingActivities, setMyUpcomingAct
                 sx={{ borderColor: mainColor, color: mainColor, flexDirection: dir === 'rtl' ? 'row-reverse' : 'row' }}
               />
               <Chip
-                icon={<MamaCoinsIcon size={18} color={mainColor} style={{ marginLeft: dir === 'rtl' ? 4 : 0, marginRight: dir === 'rtl' ? 0 : 4 }} />}
+                icon={<LocationOnIcon sx={{ ml: dir === 'rtl' ? 0.5 : 0, mr: dir === 'rtl' ? 0 : 0.5 }} />}
+                label={location}
+                variant="outlined"
+                sx={{ borderColor: mainColor, color: mainColor, flexDirection: dir === 'rtl' ? 'row-reverse' : 'row' }}
+              />
+              <Chip
+                icon={<MamaCoinsIcon size={18} color={mainColor} />}
                 label={`${price} Mama Coins`}
                 variant="outlined"
                 sx={{ borderColor: mainColor, color: mainColor, flexDirection: dir === 'rtl' ? 'row-reverse' : 'row' }}
               />
             </Stack>
-            {/* Location */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexDirection: dir === 'rtl' ? 'row-reverse' : 'row' }}>
-              <LocationOnIcon sx={{ color: mainColor }} />
-              <Typography variant="body2" sx={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}>{location}</Typography>
-            </Box>
-            {/* Participants info */}
-            {maxParticipants > 0 && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexDirection: dir === 'rtl' ? 'row-reverse' : 'row' }}>
-                <Typography variant="body2" sx={{ color: mainColor, fontWeight: 600, textAlign: dir === 'rtl' ? 'right' : 'left' }}>
-                  משתתפות: {participants}/{maxParticipants}
-                </Typography>
-                <Box sx={{
-                  flexGrow: 1,
-                  height: 8,
-                  bgcolor: '#f0f0f0',
-                  borderRadius: 4,
-                  overflow: 'hidden'
-                }}>
-                  <Box sx={{
-                    width: `${(participants / maxParticipants) * 100}%`,
-                    height: '100%',
-                    bgcolor: mainColor
-                  }} />
-                </Box>
-              </Box>
-            )}
-            {/* Times held */}
-            <Typography variant="body2" sx={{ color: mainColor, fontWeight: 600, textAlign: dir === 'rtl' ? 'right' : 'left' }}>
-              בוצעה {timesHeld} פעמים
-            </Typography>
           </Box>
           <Divider />
           {/* Comments section */}
-          <Box sx={{ p: 3 }} dir={dir}>
-            <Typography variant="h6" sx={{ color: mainColor, fontWeight: 700, mb: 2, textAlign: dir === 'rtl' ? 'right' : 'left' }}>
-              תגובות של משתתפות ({comments.length})
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: mainColor, textAlign: dir === 'rtl' ? 'right' : 'left' }}>
+              תגובות
             </Typography>
-            {comments.length === 0 ? (
-              <Typography color="text.secondary" sx={{ mb: 2, textAlign: dir === 'rtl' ? 'right' : 'left' }}>
-                עדיין אין תגובות לסדנה הזו. היי הראשונה להגיב!
-              </Typography>
-            ) : (
-              <Stack spacing={2} sx={{ mb: 3 }}>
-                {comments.map((c) => (
-                  <Box key={c.id} sx={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 1.5,
-                    bgcolor: c.text ? '#f7f3fd' : '#f5f5f5',
-                    p: 2,
-                    borderRadius: 2,
-                    flexDirection: dir === 'rtl' ? 'row-reverse' : 'row'
-                  }}>
-                    <Avatar src={c.user.avatar} sx={{ width: 40, height: 40, ml: dir === 'rtl' ? 0 : 2, mr: dir === 'rtl' ? 2 : 0 }} />
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, textAlign: dir === 'rtl' ? 'right' : 'left' }}>{c.user.name}</Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}>{c.date}</Typography>
-                      {c.text ? (
-                        <Typography variant="body2" sx={{ mt: 0.5, textAlign: dir === 'rtl' ? 'right' : 'left' }}>{c.text}</Typography>
-                      ) : (
-                        <Typography variant="body2" color="text.disabled" sx={{ mt: 0.5, fontStyle: 'italic', textAlign: dir === 'rtl' ? 'right' : 'left' }}>
-                          לא הוסיפה תגובה מילולית
+            <List>
+              {comments.map(comment => (
+                <ListItem key={comment.id} alignItems="flex-start">
+                  <ListItemAvatar>
+                    <Avatar src={comment.user.avatar} />
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={comment.user.name}
+                    secondary={
+                      <>
+                        <Typography component="span" variant="body2" color="text.primary">
+                          {comment.text}
                         </Typography>
-                      )}
-                    </Box>
-                  </Box>
-                ))}
-              </Stack>
-            )}
-            {/* Add comment form - only for attended workshops */}
-            {isAttended && (
-              <>
-                <Divider sx={{ my: 2 }} />
-                <Stack direction="row" spacing={1} alignItems="flex-end" dir={dir}>
-                  <Avatar src={liaddorImg} sx={{ width: 40, height: 40 }} />
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={2}
-                    placeholder="הוסיפי תגובה..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    variant="outlined"
-                    size="small"
-                    inputProps={{ style: { textAlign: dir === 'rtl' ? 'right' : 'left' } }}
+                        <br />
+                        <Typography component="span" variant="caption" color="text.secondary">
+                          {comment.date}
+                        </Typography>
+                      </>
+                    }
                   />
-                  <IconButton
-                    onClick={handleAddComment}
-                    disabled={!newComment.trim() || submitting}
-                    sx={{
-                      bgcolor: mainColor,
-                      color: 'white',
-                      '&:hover': { bgcolor: mainColor },
-                      '&:disabled': { bgcolor: '#ccc' }
-                    }}
-                  >
-                    <SendIcon />
-                  </IconButton>
-                </Stack>
-              </>
-            )}
+                </ListItem>
+              ))}
+            </List>
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                placeholder="הוסיפי תגובה..."
+                value={newComment}
+                onChange={e => setNewComment(e.target.value)}
+                sx={{ mr: 2 }}
+                onKeyDown={e => { if (e.key === 'Enter') handleAddComment(); }}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ bgcolor: mainColor, minWidth: 48, minHeight: 48, borderRadius: '50%' }}
+                onClick={handleAddComment}
+                disabled={submitting || !newComment.trim()}
+              >
+                <SendIcon />
+              </Button>
+            </Box>
           </Box>
         </Paper>
       </Container>
-      {/* Floating Register Button */}
-      <Fab
-        variant="extended"
-        color="primary"
-        onClick={handleRegister}
-        disabled={isRegistered}
-        sx={{
-          position: 'fixed',
-          bottom: 80,
-          left: dir === 'rtl' ? 16 : 'unset',
-          right: dir === 'rtl' ? 'unset' : 16,
-          bgcolor: isRegistered ? '#4caf50' : mainColor,
-          '&:hover': { bgcolor: isRegistered ? '#4caf50' : mainColor }
-        }}
-      >
-        <AddIcon sx={{ mr: 1 }} />
-        {isRegistered ? 'נרשמת!' : 'הרשמה לסדנה'}
-      </Fab>
-
       {/* Conflict Dialog */}
       <Dialog
         open={conflictDialogOpen}

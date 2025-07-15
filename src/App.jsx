@@ -20,7 +20,6 @@ import AboutScreen from './AboutScreen';
 import TermsScreen from './TermsScreen';
 import HelpScreen from './HelpScreen';
 import SettingsScreen from './SettingsScreen';
-import WorkshopDetails from './WorkshopDetails';
 import OnboardingScreen from './OnboardingScreen';
 // ייבוא מערכי הדמו
 import { initialMyWorkshops, attendedWorkshops, futureWorkshops, availableWorkshops, myUpcomingActivities as initialUpcoming } from './workshopData';
@@ -41,6 +40,8 @@ import Snackbar from '@mui/material/Snackbar';
 import RegistrationAgreementDialog from './RegistrationAgreementDialog';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
 import StarIcon from '@mui/icons-material/Star';
+import AdminPanel from './AdminPanel';
+import WorkshopDetails from './WorkshopDetails';
 
 const mainColor = "#b39ddb";
 const accentColor = "#d4c1ec";
@@ -910,6 +911,9 @@ function AppContent({ setAgreementOpen }) {
   // בדיקה אם האונבורדינג הוצג כבר
   const onboardingCompleted = localStorage.getItem('onboardingCompleted') === 'true';
 
+  // 1. Read guestMode from localStorage
+  const isGuest = typeof window !== 'undefined' && localStorage.getItem('guestMode') === 'true';
+
   return (
     <>
       <ScrollToTop />
@@ -935,8 +939,9 @@ function AppContent({ setAgreementOpen }) {
         <Route path="/workshop/demo2" element={<ExampleWorkshopPage />} />
         <Route path="/workshop/demo3" element={<ExampleWorkshopPage />} />
         <Route path="/workshop/demo4" element={<ExampleWorkshopPage />} />
-        <Route path="/workshop/:id" element={<WorkshopDetails myUpcomingActivities={myUpcomingActivities} setMyUpcomingActivities={setMyUpcomingActivities} />} />
         <Route path="/mama-coins" element={<MamaCoinsScreen />} />
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/workshop/:id" element={<WorkshopDetails myUpcomingActivities={myUpcomingActivities} setMyUpcomingActivities={setMyUpcomingActivities} />} />
       </Routes>
       {onboardingCompleted && location.pathname !== '/onboarding' && <BottomNavigation currentPath={location.pathname} />}
     </>
