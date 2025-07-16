@@ -223,7 +223,7 @@ function CalendarScreen() {
             <ToggleButton
               value="dayGridMonth"
               selected={calendarView === 'dayGridMonth'}
-              sx={{ fontWeight: 600, color: mainColor, bgcolor: calendarView === 'dayGridMonth' ? mainColor : undefined, color: calendarView === 'dayGridMonth' ? '#fff' : mainColor }}
+              sx={{ fontWeight: 600, bgcolor: calendarView === 'dayGridMonth' ? mainColor : undefined, color: calendarView === 'dayGridMonth' ? '#fff' : mainColor }}
               onClick={() => handleCalendarViewChange('dayGridMonth')}
             >
               חודש
@@ -231,7 +231,7 @@ function CalendarScreen() {
             <ToggleButton
               value="timeGridWeek"
               selected={calendarView === 'timeGridWeek'}
-              sx={{ fontWeight: 600, color: mainColor, bgcolor: calendarView === 'timeGridWeek' ? mainColor : undefined, color: calendarView === 'timeGridWeek' ? '#fff' : mainColor }}
+              sx={{ fontWeight: 600, bgcolor: calendarView === 'timeGridWeek' ? mainColor : undefined, color: calendarView === 'timeGridWeek' ? '#fff' : mainColor }}
               onClick={() => handleCalendarViewChange('timeGridWeek')}
             >
               שבוע
