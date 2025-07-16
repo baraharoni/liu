@@ -120,13 +120,13 @@ function WorkshopCard({ workshop, lang, showParticipants }) {
                   <ListItemAvatar sx={{ minWidth: 32 }}>
                     <Avatar src={p.avatar} sx={{ width: 24, height: 24 }} />
                   </ListItemAvatar>
-                  <ListItemText
-                    primary={p.name[lang]}
-                    sx={{
-                      '& .MuiListItemText-primary': {
+                  <ListItemText 
+                    primary={p.name[lang]} 
+                    sx={{ 
+                      '& .MuiListItemText-primary': { 
                         fontSize: '0.875rem',
                         textAlign: 'right'
-                      }
+                      } 
                     }}
                   />
                 </ListItem>
@@ -242,16 +242,16 @@ function StoryDialog({ open, workshops, index, onClose, onPrev, onNext, lang, se
     } else if (progress >= 100) {
       // Wait a short moment before moving to next story, so the bar stays full
       const timeout = setTimeout(() => {
-        handleNext();
+          handleNext();
       }, 120);
       return () => clearTimeout(timeout);
-    }
+        }
     return () => clearInterval(interval);
   }, [open, storyIndex, progress]);
 
   // Reset progress only when storyIndex changes
   React.useEffect(() => {
-    setProgress(0);
+        setProgress(0);
   }, [storyIndex, open]);
 
   // Reset modal and checks when storyIndex changes
@@ -331,14 +331,14 @@ function StoryDialog({ open, workshops, index, onClose, onPrev, onNext, lang, se
 
   return (
     <>
-      <Box
-        sx={{
+    <Box
+      sx={{
           position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, width: '100vw', height: '100vh', bgcolor: 'rgba(0,0,0,0.5)',
-          zIndex: 3000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          m: 0, p: 0, overflow: 'hidden',
-        }}
-        dir="rtl"
-      >
+        zIndex: 3000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        m: 0, p: 0, overflow: 'hidden',
+      }}
+      dir="rtl"
+    >
         <Box
           sx={{
             bgcolor: '#fff',
@@ -359,55 +359,55 @@ function StoryDialog({ open, workshops, index, onClose, onPrev, onNext, lang, se
           {/* Progress bars for all stories */}
           <Box sx={{ display: 'flex', flexDirection: 'row-reverse', gap: 1, width: '100%', px: 1, pt: 1, position: 'absolute', top: 0, right: 0, zIndex: 10 }}>
             {allStories.map((_, i) => (
-              <Box key={i} sx={{ flex: 1, mx: 0.5, minWidth: 0, direction: 'rtl' }}>
-                <LinearProgress
-                  variant="determinate"
-                  value={
+          <Box key={i} sx={{ flex: 1, mx: 0.5, minWidth: 0, direction: 'rtl' }}>
+            <LinearProgress
+              variant="determinate"
+              value={
                     i < storyIndex ? 100 :
                       i === storyIndex ? progress : 0
-                  }
-                  sx={{ height: 4, bgcolor: '#eee', borderRadius: 2, transition: 'all 0.3s linear', direction: 'rtl' }}
-                />
-              </Box>
-            ))}
+              }
+              sx={{ height: 4, bgcolor: '#eee', borderRadius: 2, transition: 'all 0.3s linear', direction: 'rtl' }}
+            />
           </Box>
-          {/* Close button */}
+        ))}
+      </Box>
+      {/* Close button */}
           <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, left: 8, zIndex: 20, bgcolor: '#fff' }}>
-            <CloseIcon />
-          </IconButton>
+        <CloseIcon />
+      </IconButton>
           {/* Story content */}
-          <Box
-            sx={{
+      <Box
+        sx={{
               width: '100%',
               maxWidth: 420,
               height: { xs: '40vh', sm: '55vh' },
               maxHeight: 350,
               bgcolor: '#eee',
               position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
               borderRadius: 3,
               mt: 5,
               mb: 2,
               overflow: 'hidden',
               pointerEvents: 'none',
-            }}
-            onClick={handleStoryClick}
-          >
+        }}
+        onClick={handleStoryClick}
+      >
             <img src={img} alt={ws.title[lang]} style={{ width: '100%', height: '100%', objectFit: 'cover', maxWidth: '100%', maxHeight: '100%' }} />
-            {/* Prev/Next arrows */}
+          {/* Prev/Next arrows */}
             {storyIndex > 0 && (
               <IconButton onClick={e => { e.stopPropagation(); handlePrev(); }} sx={{ position: 'absolute', top: '50%', left: 8, bgcolor: '#fff', transform: 'translateY(-50%)', zIndex: 11, pointerEvents: 'auto' }}>
-                <ChevronLeftIcon />
-              </IconButton>
-            )}
+              <ChevronLeftIcon />
+            </IconButton>
+          )}
             {storyIndex < allStories.length - 1 && (
               <IconButton onClick={e => { e.stopPropagation(); handleNext(); }} sx={{ position: 'absolute', top: '50%', right: 8, bgcolor: '#fff', transform: 'translateY(-50%)', zIndex: 11, pointerEvents: 'auto' }}>
-                <ChevronRightIcon />
-              </IconButton>
-            )}
-          </Box>
+              <ChevronRightIcon />
+            </IconButton>
+          )}
+        </Box>
           {/* Workshop details and button */}
           <Box sx={{
             flex: 1,
@@ -433,17 +433,17 @@ function StoryDialog({ open, workshops, index, onClose, onPrev, onNext, lang, se
               {ws.title[lang]}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'right', width: '100%', overflowWrap: 'break-word', wordBreak: 'break-word', fontSize: { xs: '0.95rem', sm: '1rem' } }}>{ws.desc[lang]}</Typography>
-            <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1, width: '100%' }}>
-              <Chip icon={<CalendarTodayIcon />} label={ws.date} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
-              <Chip icon={<AccessTimeIcon />} label={ws.time} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
-              <Chip icon={<LocationOnIcon />} label={ws.location[lang]} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
+          <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1, width: '100%' }}>
+            <Chip icon={<CalendarTodayIcon />} label={ws.date} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
+            <Chip icon={<AccessTimeIcon />} label={ws.time} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
+            <Chip icon={<LocationOnIcon />} label={ws.location[lang]} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
               <Chip icon={<MamaCoinsIcon size={18} color={mainColor} />} label={`${ws.price} Mama Coins`} variant="outlined" sx={{ borderColor: mainColor, color: mainColor }} />
-            </Stack>
+          </Stack>
             <Button variant="contained" fullWidth sx={{ bgcolor: mainColor, fontWeight: 600, mt: 2, maxWidth: 320, pointerEvents: 'auto' }} onClick={() => setAgreementOpen(true)}>
-              הרשמה לסדנה
-            </Button>
-          </Box>
+            הרשמה לסדנה
+          </Button>
         </Box>
+      </Box>
         {/* Removed Dialog for agreement as per edit hint */}
         <Snackbar
           open={snackbarOpen}
@@ -452,7 +452,7 @@ function StoryDialog({ open, workshops, index, onClose, onPrev, onNext, lang, se
           message="נרשמת בהצלחה לסדנה!"
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         />
-      </Box>
+    </Box>
     </>
   );
 }
@@ -720,14 +720,14 @@ function HomeScreen({ myWorkshops, setMyWorkshops, setPrefill, setAgreementOpen 
         <Box
           className="workshop-scrollbar"
           sx={{
-            display: 'block',
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            whiteSpace: 'nowrap',
-            maxWidth: '100vw', // חשוב למובייל
-            px: 0.5,
-            pb: 1,
-            scrollSnapType: 'x mandatory',
+          display: 'block',
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          whiteSpace: 'nowrap',
+          maxWidth: '100vw', // חשוב למובייל
+          px: 0.5,
+          pb: 1,
+          scrollSnapType: 'x mandatory',
           }}
         >
           {areaWorkshops.map(ws => (
@@ -748,14 +748,14 @@ function HomeScreen({ myWorkshops, setMyWorkshops, setPrefill, setAgreementOpen 
         <Box
           className="workshop-scrollbar"
           sx={{
-            display: 'block',
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            whiteSpace: 'nowrap',
-            maxWidth: '100vw', // חשוב למובייל
-            px: 0.5,
-            pb: 1,
-            scrollSnapType: 'x mandatory',
+          display: 'block',
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          whiteSpace: 'nowrap',
+          maxWidth: '100vw', // חשוב למובייל
+          px: 0.5,
+          pb: 1,
+          scrollSnapType: 'x mandatory',
           }}
         >
           {hotList.map(ws => (
@@ -801,10 +801,10 @@ function BottomNavigation({ currentPath }) {
       position: "fixed", bottom: 0, left: 0, right: 0, bgcolor: "#fff", borderTop: "1px solid #eee",
       display: "flex", justifyContent: "space-around", py: 1, zIndex: 100
     }}>
-      <Button
-        sx={{
-          color: currentPath === '/profile' ? mainColor : '#666',
-          flexDirection: "column",
+      <Button 
+        sx={{ 
+          color: currentPath === '/profile' ? mainColor : '#666', 
+          flexDirection: "column", 
           minWidth: "auto",
           '&:hover': { bgcolor: 'transparent' },
           flex: 1
@@ -827,7 +827,7 @@ function BottomNavigation({ currentPath }) {
         <div style={{ fontSize: "0.7rem" }}>הפרופיל שלי</div>
       </Button>
       <Button
-        sx={{
+          sx={{ 
           color: currentPath === '/my-liu' ? mainColor : '#666',
           flexDirection: "column",
           minWidth: "auto",
@@ -840,7 +840,7 @@ function BottomNavigation({ currentPath }) {
           src={liuLogo}
           alt="LIU Logo"
           style={{
-            width: 24,
+            width: 24, 
             height: 24,
             borderRadius: '50%',
             border: currentPath === '/my-liu' ? '2px solid #b39ddb' : 'none',
@@ -851,10 +851,10 @@ function BottomNavigation({ currentPath }) {
         />
         <div style={{ fontSize: "0.7rem" }}>{texts[lang].profile}</div>
       </Button>
-      <Button
-        sx={{
-          color: currentPath === '/calendar' ? mainColor : '#666',
-          flexDirection: "column",
+      <Button 
+        sx={{ 
+          color: currentPath === '/calendar' ? mainColor : '#666', 
+          flexDirection: "column", 
           minWidth: "auto",
           '&:hover': { bgcolor: 'transparent' },
           flex: 1
@@ -864,10 +864,10 @@ function BottomNavigation({ currentPath }) {
         <CalendarTodayIcon />
         <div style={{ fontSize: "0.7rem" }}>{texts[lang].calendar}</div>
       </Button>
-      <Button
-        sx={{
-          color: currentPath === '/search' ? mainColor : '#666',
-          flexDirection: "column",
+      <Button 
+        sx={{ 
+          color: currentPath === '/search' ? mainColor : '#666', 
+          flexDirection: "column", 
           minWidth: "auto",
           '&:hover': { bgcolor: 'transparent' },
           flex: 1
@@ -877,10 +877,10 @@ function BottomNavigation({ currentPath }) {
         <SearchIcon />
         <div style={{ fontSize: "0.7rem" }}>{texts[lang].search}</div>
       </Button>
-      <Button
-        sx={{
-          color: currentPath === '/' ? mainColor : '#666',
-          flexDirection: "column",
+      <Button 
+        sx={{ 
+          color: currentPath === '/' ? mainColor : '#666', 
+          flexDirection: "column", 
           minWidth: "auto",
           '&:hover': { bgcolor: 'transparent' },
           flex: 1
